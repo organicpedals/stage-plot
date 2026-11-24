@@ -27,7 +27,7 @@ export function Canvas({ p, board }: { p: Project; board: Board }) {
   const [marquee, setMarquee] = useState<{ x0: number; y0: number; x1: number; y1: number } | null>(null)
   const pan = useRef<{ x: number; y: number; tx: number; ty: number } | null>(null)
   const fitted = useRef(false)
-  const theme = THEMES.dark
+  const theme = THEMES.paper
   const pt = p.lang === 'pt'
 
   const size = () => { const r = wrap.current!.getBoundingClientRect(); return { w: r.width, h: r.height } }
@@ -199,10 +199,10 @@ export function Canvas({ p, board }: { p: Project; board: Board }) {
       <div ref={wrap} className="viewport" style={{ cursor }} onPointerDownCapture={onDownCapture} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}
         onDragOver={e => e.preventDefault()} onDrop={onDrop} onPointerDown={onBgDown}>
         <svg width="100%" height="100%" className="board">
-          <defs><pattern id="dots" width={40} height={40} patternUnits="userSpaceOnUse"><circle cx={1} cy={1} r={1} fill="#1e2228" /></pattern></defs>
+          <defs><pattern id="dots" width={40} height={40} patternUnits="userSpaceOnUse"><circle cx={1} cy={1} r={1} style={{ fill: "var(--dot)" }} /></pattern></defs>
           <rect width="100%" height="100%" fill="url(#dots)" />
           <g transform={`translate(${tx} ${ty}) scale(${z})`}>
-            <rect x={0} y={0} width={sw} height={sd} fill={theme.stage} stroke="#3A404A" strokeWidth={2 / z} />
+            <rect x={0} y={0} width={sw} height={sd} fill={theme.stage} stroke="var(--frame)" strokeWidth={2 / z} />
             {gridLines}
             <text x={sw / 2} y={sd + 0.2 + fs * 1.1} fontSize={fs * 1.1} fill={theme.muted} textAnchor="middle">{pt ? 'PLATEIA' : 'AUDIENCE'}</text>
             <g opacity={0.3} pointerEvents="none">
@@ -215,12 +215,12 @@ export function Canvas({ p, board }: { p: Project; board: Board }) {
                 <g key={it.id} onPointerDown={e => onItemDown(e, it.id)} opacity={it.hidden ? 0.22 : 1} style={{ cursor: space ? undefined : it.locked ? 'default' : 'move' }}>
                   <rect x={it.x - m / 2 - 0.05} y={it.y - m / 2 - 0.05} width={m + 0.1} height={m + 0.1} fill="transparent" />
                   <g dangerouslySetInnerHTML={{ __html: itemShape(it, theme, 1.5 / z, ak) + itemLabel(it, p, theme, fs, undefined, ak) }} />
-                  {sel && <rect x={it.x - w / 2 - 0.08 * ak} y={it.y - h / 2 - 0.08 * ak} width={w + 0.16 * ak} height={h + 0.16 * ak} fill="none" stroke="#FFB020" strokeWidth={1.5 / z} strokeDasharray={`${6 / z} ${4 / z}`} transform={`rotate(${it.rot} ${it.x} ${it.y})`} pointerEvents="none" />}
+                  {sel && <rect x={it.x - w / 2 - 0.08 * ak} y={it.y - h / 2 - 0.08 * ak} width={w + 0.16 * ak} height={h + 0.16 * ak} fill="none" stroke="#0D99FF" strokeWidth={1.5 / z} strokeDasharray={`${6 / z} ${4 / z}`} transform={`rotate(${it.rot} ${it.x} ${it.y})`} pointerEvents="none" />}
                 </g>
               )
             })}
             {board === 'light' && <g pointerEvents="none" dangerouslySetInnerHTML={{ __html: mountMarks(items.filter(i => !i.hidden), theme, ak) }} />}
-            {marquee && <rect x={Math.min(marquee.x0, marquee.x1)} y={Math.min(marquee.y0, marquee.y1)} width={Math.abs(marquee.x1 - marquee.x0)} height={Math.abs(marquee.y1 - marquee.y0)} fill="#FFB020" fillOpacity={0.08} stroke="#FFB020" strokeWidth={1 / z} strokeDasharray={`${4 / z} ${3 / z}`} pointerEvents="none" />}
+            {marquee && <rect x={Math.min(marquee.x0, marquee.x1)} y={Math.min(marquee.y0, marquee.y1)} width={Math.abs(marquee.x1 - marquee.x0)} height={Math.abs(marquee.y1 - marquee.y0)} fill="#0D99FF" fillOpacity={0.08} stroke="#0D99FF" strokeWidth={1 / z} strokeDasharray={`${4 / z} ${3 / z}`} pointerEvents="none" />}
           </g>
         </svg>
       </div>

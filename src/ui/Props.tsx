@@ -43,6 +43,7 @@ function MultiProps({ p, sel }: { p: Project; sel: Item[] }) {
   const mixed = pt ? 'Vários valores' : 'Mixed values'
   return (
     <aside className="props">
+      <div className="panel-title">Design</div>
       <h4>{sel.length} {pt ? 'itens selecionados' : 'items selected'}{def ? ` · ${def.label[p.lang]}` : ''}</h4>
       <p className="muted">{pt ? 'As alterações valem para todos os itens selecionados.' : 'Changes apply to all selected items.'}</p>
       {players.length > 0 && (
@@ -80,6 +81,7 @@ export function Props({ p }: { p: Project }) {
   const P = it ? itemParams(it) : {}
   return (
     <aside className="props">
+      <div className="panel-title">Design</div>
       {!it || !def ? <p className="muted">{pt ? 'Selecione um item no mapa para editar os parâmetros do equipamento. Atalhos: Del apagar · Ctrl+D duplicar · setas mover · Ctrl+Z desfazer.' : 'Select an item to edit its parameters. Shortcuts: Del delete · Ctrl+D duplicate · arrows move · Ctrl+Z undo.'}</p> : (<>
         <h4>{def.label[p.lang]}</h4>
         <label>{pt ? 'Rótulo / nome' : 'Label / name'}<input value={it.label} onChange={e => set({ label: e.target.value })} /></label>

@@ -29,7 +29,7 @@ export function Palette({ p, board }: { p: Project; board: Board }) {
   }
   return (
     <aside className="palette">
-      <div className="pal-head">{p.lang === 'pt' ? 'Biblioteca' : 'Library'}<small>{p.lang === 'pt' ? 'arraste ou clique' : 'drag or click'}</small></div>
+      <div className="panel-title pal-head">{p.lang === 'pt' ? 'Biblioteca' : 'Library'}<small>{p.lang === 'pt' ? 'arraste ou clique' : 'drag or click'}</small></div>
       <div className="pal-search">
         <input type="search" value={q} onChange={e => setQ(e.target.value)} placeholder={p.lang === 'pt' ? 'Buscar item…' : 'Search items…'} />
       </div>

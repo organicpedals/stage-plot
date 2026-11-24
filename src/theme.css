@@ -1,0 +1,84 @@
+/* Tema "Figma" do editor: claro e escuro. Só a interface; PDFs/mapas exportados têm temas próprios. */
+:root, :root[data-theme='dark'] {
+  --bg: #1e1e1e; --panel: #2c2c2c; --line: #3d3d3d; --line2: #4a4a4a; --fg: #f2f2f2; --muted: #a0a0a0;
+  --amber: #0d99ff; --cyan: #5cc8ff; --danger: #ff7a66; --r: 6px;
+  --field: #383838; --cv: #1e1e1e; --dot: #2c2c2c; --frame: #5a5a5a; --hover: #383838; --selbg: #0d3a5c; --selfg: #8fd0ff;
+  --pop: #383838; --pop-bd: #555; --shadow: 0 8px 24px #0009; --warnbg: #3a2f12; --warnbd: #6a5418; --warnfg: #f0c675; --okbg: #0d3a5c; --okbd: #1b5a8a;
+  font-family: Inter, 'Segoe UI', system-ui, sans-serif; color-scheme: dark;
+}
+:root[data-theme='light'] {
+  --bg: #f5f5f5; --panel: #ffffff; --line: #e6e6e6; --line2: #d0d0d0; --fg: #1e1e1e; --muted: #7a7a7a;
+  --amber: #0d99ff; --cyan: #0b7fd1; --danger: #e5391b; --r: 6px;
+  --field: #f5f5f5; --cv: #e5e5e5; --dot: #d6d6d6; --frame: #bdbdbd; --hover: #f0f0f0; --selbg: #e5f4ff; --selfg: #0b6fb5;
+  --pop: #ffffff; --pop-bd: #d0d0d0; --shadow: 0 8px 24px #00000026; --warnbg: #fff7e0; --warnbd: #f0d27a; --warnfg: #7a5a00; --okbg: #e5f4ff; --okbd: #b9defa;
+  color-scheme: light;
+}
+body { background: var(--bg); color: var(--fg); font-size: 13px }
+
+/* controles */
+button { border-radius: var(--r); padding: 6px 11px; border-color: var(--line2); background: var(--panel) }
+button:hover:not(:disabled) { border-color: var(--amber); background: var(--hover) }
+button.ghost { background: transparent }
+button.ghost:hover:not(:disabled) { background: var(--hover); border-color: transparent; color: var(--fg) }
+button.primary { background: var(--amber); border-color: var(--amber); color: #fff }
+button.primary:hover:not(:disabled) { background: #0b86e0; border-color: #0b86e0 }
+input, select, textarea { background: var(--field); border: 1px solid transparent; border-radius: 5px; color: var(--fg) }
+input:hover, select:hover, textarea:hover { border-color: var(--line2) }
+input:focus, textarea:focus, select:focus { outline: none; border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber) }
+select option { background: var(--pop); color: var(--fg) }
+::placeholder { color: var(--muted) }
+.btn { background: var(--panel); border-color: var(--line2); border-radius: var(--r) }
+.themebtn { white-space: nowrap }
+
+/* cabeçalho: abas de documento */
+.top { background: var(--panel); border-bottom: 1px solid var(--line); gap: 8px; padding: 6px 12px }
+.top .title { background: transparent }
+.tabs { gap: 2px }
+.tabs button { border: 0; border-radius: 6px; padding: 6px 12px; color: var(--muted) }
+.tabs button:hover:not(:disabled) { background: var(--hover); color: var(--fg) }
+.tabs button.on { background: var(--selbg); color: var(--selfg); border: 0; font-weight: 500 }
+
+/* painéis */
+.palette, .props { background: var(--panel); padding: 0 }
+.palette > *, .props > * { margin-left: 12px; margin-right: 12px }
+.palette > .panel-title, .props > .panel-title { margin: 0 0 10px; padding: 10px 12px; border-bottom: 1px solid var(--line); font-weight: 600; font-size: 12px; color: var(--fg); position: sticky; top: 0; background: var(--panel); z-index: 3 }
+.pal-head small { color: var(--muted); font-weight: 400; margin-left: 6px }
+.pal-search { background: var(--panel); top: 38px }
+.pal-search input { background: var(--field); border: 1px solid transparent; color: var(--fg) }
+.pal-search input:focus { border-color: var(--amber) }
+.pal-empty { color: var(--muted) }
+h4 { color: var(--muted); letter-spacing: .06em }
+.ico { background: var(--field); border-color: transparent }
+.ico:hover:not(:disabled) { border-color: var(--amber); background: var(--hover) }
+.ico svg { color: var(--fg) }
+.parbox { background: var(--field); border-color: var(--line) }
+.chhint { background: var(--okbg); border-color: var(--okbd); color: var(--selfg) }
+.chhint small { color: var(--muted) }
+.field { color: var(--muted) }
+.canvas-tools { background: var(--panel); border-bottom: 1px solid var(--line) }
+.canvas-tools .sep { background: var(--line2) }
+.canvas-scroll, .viewport { background: var(--cv) }
+.board { background: var(--cv) }
+.vis-panel, .mus-list { background: var(--pop); border-color: var(--pop-bd); box-shadow: var(--shadow); color: var(--fg) }
+.mus-list li { color: var(--fg) } .mus-list li:hover, .mus-list li.hi { background: var(--hover) } .mus-list li.cur { color: var(--amber) }
+
+/* páginas de documento, tabelas, exportação, home */
+.sec, .card { background: var(--panel); border-color: var(--line) }
+.card:hover { border-color: var(--amber) }
+.card.new { color: var(--muted); background: transparent }
+.card.new b, .ed { color: var(--amber) }
+.logo { background: var(--amber) }
+thead th { background: var(--bg); color: var(--muted) }
+td { border-bottom-color: var(--line) }
+table.edit input.cell { background: transparent }
+table.edit input.cell:hover { background: var(--field) }
+tr.manual td:first-child { box-shadow: inset 2px 0 var(--amber) }
+.preview { background: var(--cv) }
+.busy, .preview .openpdf { background: var(--panel); border-color: var(--line2); color: var(--fg) }
+.pdfstyle { border-color: var(--line2); background: var(--panel) }
+.pdfstyle.on { outline-color: var(--amber) }
+.gaps { background: var(--warnbg); border-color: var(--warnbd); color: var(--warnfg) }
+.gaps ul { color: var(--fg) }
+.error, button.danger { color: var(--danger) }
+.swatch, .accent-row input[type=color] { border-color: var(--line2) }
+button:focus-visible, .card:focus-visible, .btn:focus-within { outline-color: var(--amber) }
