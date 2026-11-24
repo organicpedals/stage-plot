@@ -54,29 +54,27 @@ function cabinet(n: number, inch: number, head: boolean, bass: boolean): Glyph {
 const drumTop = (cx: number, cy: number, r: number, lugs = 8, accent = false) =>
   C(cx, cy, r, 1) + C(cx, cy, r - 1.5, 0.5) + C(cx, cy, r * 0.42, 0.45, accent ? '$A' : '$I') + range(lugs).map(i => { const a = (i * 2 * Math.PI) / lugs + 0.2; return L(cx + Math.cos(a) * (r + 0.4), cy + Math.sin(a) * (r + 0.4), cx + Math.cos(a) * (r + 2.4), cy + Math.sin(a) * (r + 2.4), 0.9) }).join('')
 
-// Montagem de um kit em vista superior (baterista embaixo, plateia em cima, destro):
-// bumbo no centro à frente; tons de bumbo logo atrás dele (menor à esquerda, maior à direita); caixa entre os joelhos (um pouco à esquerda);
-// surdos à direita do baterista. Só o "shell pack": sem pratos, estantes, banco, pedais ou chimbal.
+// Montagem do kit posicionada à mão no editor (tools/drum-editor.html), em cm, com a bateria olhando para CIMA
+// (origem = centro-topo do bumbo; x→direita, y→baterista). No mapa o baterista fica ao fundo olhando a plateia (para baixo),
+// então o desenho inteiro é girado 180°. Só o shell pack: sem pratos, estantes, banco, pedais ou chimbal.
+const KICK_POS: Record<number, [number, number][]> = { 1: [[0, 0]], 2: [[-30, 0], [30, 0]] }
+const TOM_POS: Record<number, [number, number][]> = { 0: [], 1: [[-12, 15]], 2: [[-17, 17], [17, 16]], 3: [[-47, 21], [-14, 9], [25, 11]], 4: [[-64, 37], [-46, 15], [-14, 6], [23, 10]] }
 const TOM_IN: Record<number, number[]> = { 0: [], 1: [12], 2: [10, 12], 3: [10, 12, 13], 4: [8, 10, 12, 13] }
+const SNARE_POS: [number, number] = [-28, 54]
+const FLOOR_POS: Record<number, [number, number][]> = { 0: [], 1: [[37, 54]], 2: [[63, 85], [46, 44]] }
+const FLOOR_IN = [16, 14]
 function drums(P: Params): Glyph {
   const k = Math.min(2, Math.max(1, N(P, 'kick', 1))), t = Math.min(4, Math.max(0, N(P, 'toms', 2))), f = Math.min(2, Math.max(0, N(P, 'floors', 1)))
   const parts: { s: string; x0: number; y0: number; x1: number; y1: number }[] = []
   const add = (s: string, cx: number, cy: number, r: number) => parts.push({ s, x0: cx - r - 3, y0: cy - r - 3, x1: cx + r + 3, y1: cy + r + 3 })
   const kw = 56, kd = 40
-  const kx = range(k).map(i => (i - (k - 1) / 2) * (kw + 4))
-  kx.forEach(x => { parts.push({ s: R(x - kw / 2, 0, kw, kd, 3) + L(x - kw / 2, 4, x + kw / 2, 4, 0.7) + L(x - kw / 2, kd - 4, x + kw / 2, kd - 4, 0.7) + range(5).map(j => L(x - 20 + j * 10, 4, x - 20 + j * 10, kd - 4, 0.4)).join('') + L(x - kw / 2 - 1, 8, x - kw / 2 - 5, 15, 0.9) + L(x + kw / 2 + 1, 8, x + kw / 2 + 5, 15, 0.9), x0: x - kw / 2 - 6, y0: 0, x1: x + kw / 2 + 6, y1: kd }) })
-  const sizes = TOM_IN[t] ?? [], gapT = 3, rs = sizes.map(s => (s * 2.54) / 2)
-  const total = rs.reduce((a, r) => a + 2 * r, 0) + gapT * Math.max(0, rs.length - 1)
-  let cx = -total / 2
-  rs.forEach((r, i) => { cx += r; add(drumTop(cx, kd + 10 + r * 0.6 + Math.abs(i - (rs.length - 1) / 2) * 1.2, r, 8, i === 0), cx, kd + 10 + r * 0.6 + Math.abs(i - (rs.length - 1) / 2) * 1.2, r); cx += r + gapT })
-  const half = kx[kx.length - 1] + kw / 2 + 6, tomBottom = kd + 10 + (rs.length ? Math.max(...rs) * 1.6 : 0)
-  const sy = Math.max(kd + 32, tomBottom + 18)
-  add(drumTop(-12, sy, 18, 10), -12, sy, 18) // caixa 14"
-  const fr = [(16 * 2.54) / 2, (14 * 2.54) / 2]
-  let fx = Math.max(half + 6, 44)
-  range(f).forEach(i => { const r = fr[i]; fx += r; add(drumTop(fx, sy - 2, r, 10), fx, sy - 2, r); fx += r + 3 })
+  KICK_POS[k].forEach(([x]) => parts.push({ s: R(x - kw / 2, 0, kw, kd, 3) + L(x - kw / 2, 4, x + kw / 2, 4, 0.7) + L(x - kw / 2, kd - 4, x + kw / 2, kd - 4, 0.7) + range(5).map(j => L(x - 20 + j * 10, 4, x - 20 + j * 10, kd - 4, 0.4)).join(''), x0: x - kw / 2, y0: 0, x1: x + kw / 2, y1: kd }))
+  TOM_POS[t].forEach(([x, y], i) => add(drumTop(x, y, (TOM_IN[t][i] * 2.54) / 2, 8, i === 0), x, y, (TOM_IN[t][i] * 2.54) / 2))
+  add(drumTop(SNARE_POS[0], SNARE_POS[1], (14 * 2.54) / 2, 10), SNARE_POS[0], SNARE_POS[1], (14 * 2.54) / 2)
+  FLOOR_POS[f].forEach(([x, y], i) => add(drumTop(x, y, (FLOOR_IN[i] * 2.54) / 2, 10), x, y, (FLOOR_IN[i] * 2.54) / 2))
   const minX = Math.min(...parts.map(p => p.x0)), minY = Math.min(...parts.map(p => p.y0)), maxX = Math.max(...parts.map(p => p.x1)), maxY = Math.max(...parts.map(p => p.y1))
-  return { w: maxX - minX + 4, h: maxY - minY + 4, d: place(2 - minX, 2 - minY, parts.map(p => p.s).join('')) }
+  const inner = `<g transform="rotate(180 ${((minX + maxX) / 2).toFixed(2)} ${((minY + maxY) / 2).toFixed(2)})">${parts.map(p => p.s).join('')}</g>`
+  return { w: maxX - minX + 4, h: maxY - minY + 4, d: place(2 - minX, 2 - minY, inner) }
 }
 
 // ---------- percussão (vista superior) ----------
