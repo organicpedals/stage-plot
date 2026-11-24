@@ -1,0 +1,61 @@
+{
+  "name": "stage-plot",
+  "private": true,
+  "version": "0.1.0",
+  "type": "module",
+  "scripts": {
+    "dev": "vite --port 8801",
+    "build": "tsc --noEmit && vite build",
+    "preview": "vite preview --port 8801",
+    "test": "vitest run",
+    "desktop": "cross-env OUT_DIR=dist npm run build && electron-builder --win",
+    "desktop:dev": "cross-env OUT_DIR=dist npm run build && electron ."
+  },
+  "dependencies": {
+    "jspdf": "^2.5.2",
+    "react": "^18.3.1",
+    "react-dom": "^18.3.1",
+    "svg2pdf.js": "^2.2.4",
+    "zustand": "^4.5.5"
+  },
+  "devDependencies": {
+    "@types/react": "^18.3.12",
+    "@types/react-dom": "^18.3.1",
+    "@vitejs/plugin-react": "^4.3.3",
+    "cross-env": "^10.1.0",
+    "electron": "^45.4.1",
+    "electron-builder": "^26.18.0",
+    "typescript": "^5.6.3",
+    "vite": "^5.4.10",
+    "vitest": "^2.1.4"
+  },
+  "description": "Stage Plot — mapas de palco, luz e rider técnico",
+  "author": "Stage Plot",
+  "main": "electron/main.cjs",
+  "build": {
+    "appId": "br.stageplot.app",
+    "productName": "Stage Plot",
+    "directories": {
+      "output": "release"
+    },
+    "files": [
+      "dist/**",
+      "electron/**",
+      "package.json"
+    ],
+    "win": {
+      "target": [
+        "nsis",
+        "portable"
+      ]
+    },
+    "nsis": {
+      "oneClick": false,
+      "allowToChangeInstallationDirectory": true,
+      "artifactName": "StagePlot-Setup-${version}.exe"
+    },
+    "portable": {
+      "artifactName": "StagePlot-Portable-${version}.exe"
+    }
+  }
+}
