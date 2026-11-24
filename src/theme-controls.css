@@ -1,0 +1,49 @@
+/* ===== Controles por estilo: sliders (progresso via --p, definido em theme.ts), checkboxes, steppers, pop-ups ===== */
+input[type=range] { -webkit-appearance: none; appearance: none; background: transparent; height: 22px; padding: 0; border: 0; cursor: pointer }
+input[type=range]:focus { box-shadow: none }
+input[type=range]::-webkit-slider-runnable-track { background: linear-gradient(to right, var(--amber) var(--p, 50%), var(--line2) var(--p, 50%)); height: 4px; border-radius: 2px }
+input[type=range]::-webkit-slider-thumb { -webkit-appearance: none; width: 14px; height: 14px; margin-top: -5px; border-radius: 50%; background: #fff; border: 0; box-shadow: 0 0 0 1px #0003, 0 1px 3px #0004 }
+input[type=range]:focus-visible::-webkit-slider-thumb { box-shadow: 0 0 0 3px color-mix(in srgb, var(--amber) 40%, transparent), 0 1px 3px #0004 }
+input[type=range]::-moz-range-track { background: var(--line2); height: 4px; border-radius: 2px }
+input[type=range]::-moz-range-progress { background: var(--amber); height: 4px; border-radius: 2px }
+input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 50%; background: #fff; border: 0; box-shadow: 0 0 0 1px #0003, 0 1px 3px #0004 }
+
+/* ----- Figma: slider fino de 2 px com thumb pequeno de contorno azul; checkbox quadrado; números "arrastáveis"; seções com divisores ----- */
+[data-skin='figma'] input[type=range]::-webkit-slider-runnable-track { height: 2px; border-radius: 1px }
+[data-skin='figma'] input[type=range]::-webkit-slider-thumb { width: 12px; height: 12px; margin-top: -5px; box-shadow: 0 0 0 1px var(--amber), 0 1px 2px #0003 }
+[data-skin='figma'] input[type=checkbox] { appearance: none; -webkit-appearance: none; width: 14px; height: 14px; border-radius: 3px; border: 1px solid var(--line2); background: var(--field); position: relative; cursor: pointer; flex: none; vertical-align: middle; padding: 0 }
+[data-skin='figma'] input[type=checkbox]:checked { background: var(--amber); border-color: var(--amber) }
+[data-skin='figma'] input[type=checkbox]:checked::after { content: ''; position: absolute; left: 3.5px; top: 0.5px; width: 4px; height: 8px; border: solid #fff; border-width: 0 1.6px 1.6px 0; transform: rotate(45deg) }
+[data-skin='figma'] label { font-size: 11px }
+[data-skin='figma'] h4 { font-size: 11px; font-weight: 600; letter-spacing: 0; text-transform: none; color: var(--fg); padding: 10px 0 6px; margin: 0; border-top: 1px solid var(--line) }
+[data-skin='figma'] .palette section:first-of-type h4, [data-skin='figma'] .props h4 { border-top: 0 }
+[data-skin='figma'] .parbox { background: transparent; border: 0; border-top: 1px solid var(--line); border-radius: 0; padding: 10px 0 2px }
+[data-skin='figma'] .stepper { gap: 2px; grid-template-columns: 26px 1fr 26px }
+[data-skin='figma'] .stepper button { background: var(--field); border-color: transparent; padding: 3px 0 }
+[data-skin='figma'] .stepper input, [data-skin='figma'] .slide input:not([type=range]) { cursor: ew-resize; font-variant-numeric: tabular-nums }
+[data-skin='figma'] select { appearance: none; -webkit-appearance: none; padding-right: 22px; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 10 10'%3E%3Cpath d='M2 3.5 5 6.5 8 3.5' fill='none' stroke='%23888' stroke-width='1.2'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 7px center }
+[data-skin='figma'] .ico { border-radius: 4px }
+[data-skin='figma'] button.danger { border-color: transparent; background: transparent }
+
+/* ----- Apple: slider macOS (trilho 4 px preenchido, thumb branco de 22 px com sombra), stepper unido, pop-up com chevrons, listas inset ----- */
+[data-skin='apple'] input[type=range] { height: 26px }
+[data-skin='apple'] input[type=range]::-webkit-slider-runnable-track { height: 4px; border-radius: 2px; background: linear-gradient(to right, var(--amber) var(--p, 50%), var(--seg) var(--p, 50%)) }
+[data-skin='apple'] input[type=range]::-webkit-slider-thumb { width: 22px; height: 22px; margin-top: -9px; box-shadow: 0 0 0 .5px #0003, 0 2px 6px #0004, 0 1px 1px #0002 }
+[data-skin='apple'] .stepper { gap: 0; background: var(--seg); border-radius: 8px; padding: 2px; grid-template-columns: 30px 1fr 30px; align-items: center }
+[data-skin='apple'] .stepper button { background: transparent; border: 0; box-shadow: none; border-radius: 6px; font-size: 15px; color: var(--fg); padding: 2px 0 }
+[data-skin='apple'] .stepper button:hover:not(:disabled) { background: var(--segon); box-shadow: 0 1px 2px #0003 }
+[data-skin='apple'] .stepper input { background: transparent; text-align: center; padding: 4px 2px; font-variant-numeric: tabular-nums }
+[data-skin='apple'] .stepper input:focus { background: var(--segon) }
+[data-skin='apple'] select { appearance: none; -webkit-appearance: none; padding: 5px 24px 5px 10px; border: .5px solid var(--line2); background-color: var(--panel); box-shadow: 0 1px 1px #0000000d; background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='14' viewBox='0 0 10 14'%3E%3Cpath d='M2 5.5 5 2.5 8 5.5M2 8.5 5 11.5 8 8.5' fill='none' stroke='%23888' stroke-width='1.4' stroke-linecap='round' stroke-linejoin='round'/%3E%3C/svg%3E"); background-repeat: no-repeat; background-position: right 8px center }
+[data-skin='apple'] .top select, [data-skin='apple'] .brand select { background-color: transparent; border-color: transparent; box-shadow: none }
+[data-skin='apple'] .props .parbox label { flex-direction: row; align-items: center; justify-content: space-between; gap: 10px; margin: 0; padding: 7px 0; border-bottom: .5px solid var(--line); font-size: 13px; color: var(--fg) }
+[data-skin='apple'] .props .parbox label:last-child { border-bottom: 0 }
+[data-skin='apple'] .props .parbox label > select, [data-skin='apple'] .props .parbox label > input:not([type=checkbox]), [data-skin='apple'] .props .parbox label > .stepper { width: 55%; flex: none }
+[data-skin='apple'] .props .parbox label.chk { justify-content: space-between; flex-direction: row-reverse }
+[data-skin='apple'] .props > label.chk { justify-content: space-between; flex-direction: row-reverse; padding: 8px 0; border-bottom: .5px solid var(--line); margin-bottom: 0; color: var(--fg); font-size: 13px }
+[data-skin='apple'] .field { color: var(--fg); font-size: 13px }
+[data-skin='apple'] .slide input:not([type=range]) { background: var(--seg); font-variant-numeric: tabular-nums }
+[data-skin='apple'] button.danger { display: block; width: calc(100% - 24px); margin-top: 14px; padding: 8px; background: var(--panel); border: .5px solid var(--line); font-weight: 500 }
+[data-skin='apple'] .ico span { font-size: 10px }
+[data-skin='apple'] .props label.chk { white-space: normal; text-align: left; gap: 10px }
+[data-skin='apple'] .props .parbox { padding: 2px 12px }

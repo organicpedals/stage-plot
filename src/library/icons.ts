@@ -49,18 +49,16 @@ const drum = (x: number, y: number, r: number, o = 0.1) => ci(x, y, r, o) + ring
 const spk = (x: number, y: number, r: number) => ci(x, y, r, 0.08) + ring(x, y, r * 0.5) + dotA(x, y, Math.max(1.8, r * 0.18))
 
 // ---------- estilo global dos ícones ----------
-export type IconStyle = 'A' | 'N' | 'Q' | 'R' | 'S'
+export type IconStyle = 'S' | 'P' | 'F'
 export const ICON_STYLES: { id: IconStyle; label: { pt: string; en: string } }[] = [
-  { id: 'A', label: { pt: 'Atual', en: 'Current' } },
-  { id: 'N', label: { pt: 'N · Suave', en: 'N · Soft' } },
-  { id: 'Q', label: { pt: 'Q · Mais corpo', en: 'Q · Fuller' } },
-  { id: 'R', label: { pt: 'R · Fundo ciano', en: 'R · Tinted' } },
-  { id: 'S', label: { pt: 'S · Planta detalhada', en: 'S · Detailed plan' } },
+  { id: 'S', label: { pt: 'Planta detalhada', en: 'Detailed plan' } },
+  { id: 'P', label: { pt: 'Apple · SF Symbols', en: 'Apple · SF Symbols' } },
+  { id: 'F', label: { pt: 'Figma · Vetor', en: 'Figma · Vector' } },
 ]
 const STYLE_KEY = 'stageplot.iconstyle'
 const loadStyle = (): IconStyle => {
   try { const v = typeof localStorage !== 'undefined' ? localStorage.getItem(STYLE_KEY) : null; if (v && ICON_STYLES.some(x => x.id === v)) return v as IconStyle } catch { /* ignore */ }
-  return 'A'
+  return 'S'
 }
 /** Preferência global (vale para todos os projetos, palco, luz e exportações). */
 export const useIconStyle = create<{ style: IconStyle; setStyle: (s: IconStyle) => void }>(set => ({
@@ -69,20 +67,33 @@ export const useIconStyle = create<{ style: IconStyle; setStyle: (s: IconStyle) 
 }))
 const curStyle = () => useIconStyle.getState().style
 
+/** Pacotes de ícones sobre o mesmo desenho:
+ *  P (Apple / SF Symbols): traço mais firme com pontas arredondadas, camada primária opaca + secundária translúcida
+ *    ("hierárquico"), cantos mais suaves (squircle), selo de destaque cheio.
+ *  F (Figma): só contorno fino de 1,5 px, cantos quase retos, pontas retas e os pontos de destaque viram
+ *    âncoras de vetor (quadradinho branco com contorno colorido). */
 export function paint(svg: string, ink: string, accent: string, sw: number, style: IconStyle = curStyle()): string {
-  if (style !== 'A' && style !== 'S') {
+  let wrap = ''
+  if (style === 'P') {
+    sw *= 1.25; wrap = 'stroke-linecap="round" stroke-linejoin="round"'
     svg = svg
-      .replace(/fill="\$I" fill-opacity="([\d.]+)"/g, (m, o) => {
-        const v = Number(o)
-        if (style === 'Q') return `fill="$I" fill-opacity="${Math.min(0.5, v * 1.8).toFixed(2)}"`
-        if (style === 'R' && v <= 0.3) return `fill="$A" fill-opacity="0.16"`
-        return m
+      .replace(/fill="\$I" fill-opacity="([\d.]+)"/g, (_m, o) => `fill="$I" fill-opacity="${Math.min(0.24, Number(o) * 1.6 + 0.04).toFixed(2)}"`)
+      .replace(/(?<!-)opacity="0?\.[67]"/g, 'opacity="1"')
+      .replace(/rx="([\d.]+)"/g, (_m, r) => `rx="${(Number(r) * 1.7).toFixed(2)}"`)
+  } else if (style === 'F') {
+    sw *= 0.8; wrap = 'stroke-linecap="butt" stroke-linejoin="miter"'
+    svg = svg
+      .replace(/fill="\$I" fill-opacity="[\d.]+"/g, 'fill="none"')
+      .replace(/(?<!-)opacity="0?\.[67]"/g, 'opacity="1"')
+      .replace(/rx="([\d.]+)"/g, (_m, r) => `rx="${Math.min(1.5, Number(r) * 0.4).toFixed(2)}"`)
+      .replace(/<circle cx="([\d.-]+)" cy="([\d.-]+)" r="([\d.]+)" fill="\$A" stroke="none"\/>/g, (_m, x, y, r) => {
+        const h = Number(r) + 0.7
+        return `<rect x="${(Number(x) - h).toFixed(2)}" y="${(Number(y) - h).toFixed(2)}" width="${(h * 2).toFixed(2)}" height="${(h * 2).toFixed(2)}" fill="#FFFFFF" stroke="$A" stroke-width="$W(1.1)"/>`
       })
-      .replace(/(?<!-)opacity="0?\.[67]"/g, style === 'Q' ? 'opacity=".85"' : 'opacity="1"')
-      .replace(/fill="\$A" stroke="none"/g, style === 'N' ? `fill="$A" fill-opacity=".9" stroke="$A" stroke-width="${(sw * 0.67).toFixed(3)}"`
-        : style === 'Q' ? `fill="$A" stroke="$I" stroke-width="${(sw * 0.55).toFixed(3)}"` : 'fill="$A" stroke="none"')
+      .replace(/<rect ([^>]*?)fill="\$A" stroke="none"\/>/g, '<rect $1fill="#FFFFFF" stroke="$A" stroke-width="$W(1.1)"/>')
   }
-  return svg.replace(/\$W\(([\d.]+)\)/g, (_m, k) => (sw / Number(k)).toFixed(3)).replace(/\$I/g, ink).replace(/\$A/g, accent)
+  svg = svg.replace(/\$W\(([\d.]+)\)/g, (_m, k) => (sw / Number(k)).toFixed(3)).replace(/\$I/g, ink).replace(/\$A/g, accent)
+  return wrap ? `<g ${wrap}>${svg}</g>` : svg
 }
 
 // ---------- parâmetros ----------
@@ -546,14 +557,14 @@ const SGEOM: Record<string, [number, number, number, number, string]> = {
   blinder: [0, 0, 100, 62, rr(0, 0, 100, 62, 6, 0.12) + ci(28, 31, 20, 0.1) + dr(28, 31, 12) + dotA(28, 31, 5) + ci(72, 31, 20, 0.1) + dr(72, 31, 12) + dotA(72, 31, 5)],
   mirrorball: [0, 0, 100, 100, L(50, 0, 50, 24) + rr(42, 20, 16, 8, 2, 0.2) + ci(50, 64, 34, 0.12) + dr(50, 64, 22) + dl(16, 64, 84, 64) + dl(50, 30, 50, 98) + dotA(38, 52, 4)],
 }
-/** Nos estilos N/Q/R usa a geometria original (acima); o estilo "Atual" mantém o desenho de sempre. */
+/** Todos os pacotes usam a geometria da planta detalhada (SGEOM), quando existe; P e F só mudam o traço (ver paint). */
 const withLegacy = (d: IconDef): IconDef => {
   if (!LEG[d.id] && !SGEOM[d.id]) return d
   return {
     ...d,
     build: P => {
-      const b = d.build(P); if (curStyle() === 'A') return b
-      const g = (curStyle() === 'S' ? SGEOM[d.id] : undefined) ?? LEG[d.id]; if (!g) return b
+      const b = d.build(P)
+      const g = SGEOM[d.id] ?? LEG[d.id]; if (!g) return b
       const [bx, by, bw, bh, art] = g
       const s = Math.max(b.w, b.h) / Math.max(bw, bh)
       return { w: bw * s, h: bh * s, svg: `<g transform="scale(${s.toFixed(4)}) translate(${-bx} ${-by})" stroke-width="$W(${s.toFixed(4)})">${art}</g>` }
