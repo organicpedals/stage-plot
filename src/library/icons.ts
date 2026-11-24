@@ -50,11 +50,12 @@ const drum = (x: number, y: number, r: number, o = 0.1) => ci(x, y, r, o) + ring
 const spk = (x: number, y: number, r: number) => ci(x, y, r, 0.08) + ring(x, y, r * 0.5) + dotA(x, y, Math.max(1.8, r * 0.18))
 
 // ---------- estilo global dos ícones ----------
-export type IconStyle = 'S' | 'P' | 'F'
+export type IconStyle = 'S' | 'P' | 'F' | 'R'
 export const ICON_STYLES: { id: IconStyle; label: { pt: string; en: string } }[] = [
   { id: 'S', label: { pt: 'Planta detalhada', en: 'Detailed plan' } },
   { id: 'P', label: { pt: 'Apple · SF Symbols', en: 'Apple · SF Symbols' } },
   { id: 'F', label: { pt: 'Figma · Vetor', en: 'Figma · Vector' } },
+  { id: 'R', label: { pt: 'Realista · Silhueta', en: 'Realistic · Silhouette' } },
 ]
 const STYLE_KEY = 'stageplot.iconstyle'
 const loadStyle = (): IconStyle => {
@@ -82,6 +83,8 @@ export function paint(svg: string, ink: string, accent: string, sw: number, styl
       .replace(/fill="\$I" fill-opacity="([\d.]+)"/g, (_m, o) => `fill="$I" fill-opacity="${Math.min(0.24, Number(o) * 1.6 + 0.04).toFixed(2)}"`)
       .replace(/(?<!-)opacity="0?\.[67]"/g, 'opacity="1"')
       .replace(/rx="([\d.]+)"/g, (_m, r) => `rx="${(Number(r) * 1.7).toFixed(2)}"`)
+  } else if (style === 'R') {
+    wrap = 'stroke-linecap="round" stroke-linejoin="round"' // glifos realistas (packs-real.ts) já vêm prontos; itens sem glifo seguem a base
   } else if (style === 'F') {
     sw *= pk ? 1 : 0.8; wrap = 'stroke-linecap="butt" stroke-linejoin="miter"'
     if (!pk) svg = svg
