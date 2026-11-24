@@ -204,7 +204,6 @@ export function Canvas({ p, board }: { p: Project; board: Board }) {
           <g transform={`translate(${tx} ${ty}) scale(${z})`}>
             <rect x={0} y={0} width={sw} height={sd} fill={theme.stage} stroke="#3A404A" strokeWidth={2 / z} />
             {gridLines}
-            <text x={sw / 2} y={-0.2} fontSize={fs * 1.1} fill={theme.muted} textAnchor="middle">{pt ? 'FUNDO DO PALCO' : 'UPSTAGE'}</text>
             <text x={sw / 2} y={sd + 0.2 + fs * 1.1} fontSize={fs * 1.1} fill={theme.muted} textAnchor="middle">{pt ? 'PLATEIA' : 'AUDIENCE'}</text>
             <g opacity={0.3} pointerEvents="none">
               {stageRef.map(it => <g key={it.id} dangerouslySetInnerHTML={{ __html: itemShape(it, { ...theme, fg: theme.muted, audio: theme.muted }, 1.5 / z, ak) }} />)}

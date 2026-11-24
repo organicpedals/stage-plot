@@ -28,10 +28,16 @@ export function tone(hex: string, bg: string, min = 4.5): string {
   return c
 }
 
+/** mistura `hex` com o fundo (t = parte da cor): réguas e grades finas ficam na família da cor escolhida. */
+export function tint(hex: string, bg: string, t: number): string {
+  const a = [1, 3, 5].map(i => parseInt(hex.slice(i, i + 2), 16)), b = [1, 3, 5].map(i => parseInt(bg.slice(i, i + 2), 16))
+  return '#' + a.map((v, i) => Math.round(b[i] + (v - b[i]) * t).toString(16).padStart(2, '0')).join('').toUpperCase()
+}
+
 /** tema da página que está sendo criada: SÓ a capa (página 1) é escura; todas as demais, claras */
 export function pageThemeFor(d: Doc): Theme {
   const base = d.page === 1 || d.part === 'outro' ? (d.mono ? MONO_DARK : DARK) : (d.mono ? THEMES.mono : LIGHT), c = d.mono ? undefined : customAccent(d)
-  return c ? { ...base, accent: tone(c, base.bg), audio: tone(c, base.bg) } : base
+  return c ? { ...base, accent: tone(c, base.bg), audio: tone(c, base.bg), grid: tint(c, base.bg, lum(base.bg) < 0.3 ? 0.35 : 0.25) } : base
 }
 
 /** acento único e cor das réguas finas, conforme a página (clara/escura, cor/P&B) */
@@ -39,7 +45,7 @@ export const pal = (d: Doc) => {
   const dk = isDark(d)
   if (d.mono) return dk ? { accent: '#FFFFFF', line: '#555555' } : { accent: '#000000', line: '#9A9A9A' }
   const c = customAccent(d)
-  return dk ? { accent: c ? tone(c, DARK.bg) : '#B8AB63', line: '#4A4A4E' } : { accent: c ? tone(c, LIGHT.bg) : '#6F6620', line: '#CFCABB' }
+  return dk ? { accent: c ? tone(c, DARK.bg) : '#B8AB63', line: c ? tint(c, DARK.bg, 0.4) : '#4A4A4E' } : { accent: c ? tone(c, LIGHT.bg) : '#6F6620', line: c ? tint(c, LIGHT.bg, 0.3) : '#CFCABB' }
 }
 
 type GS = { GState: new (o: Record<string, number>) => unknown; setGState(g: unknown): void }

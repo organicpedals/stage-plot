@@ -94,6 +94,11 @@ export function boardSvg(p: Project, board: Board, o: BoardOpts): { svg: string;
     eT = Math.max(eT, hh - it.y + 0.2 * K); eB = Math.max(eB, it.y + hh + lab - sd)
   }
   eL = Math.max(0, eL - m * 0.5); eR = Math.max(0, eR - m * 0.5); eT = Math.max(0, eT - m * 0.5); eB = Math.max(0, eB - 0.4 * K)
+  // legenda de posição (aéreo/chão): coluna na lateral direita, fora do palco, para não cobrir equipamentos
+  const used = board === 'light' ? (['aereo', 'chao'] as const).filter(k => p.items.some(i => i.board === 'light' && mountOf(i) === k)) : []
+  const mLabel = (k: 'aereo' | 'chao') => (p.lang === 'pt' ? MOUNT[k].pt : MOUNT[k].en)
+  const legW = used.length ? (0.45 + Math.max(...used.map(k => mLabel(k).length)) * 0.13) * K : 0
+  eR += legW
   const W = sw + m * 2 + eL + eR
   const H = sd + m * 2 + 0.7 * K + legH + eT + eB
   const parts: string[] = []
@@ -104,7 +109,6 @@ export function boardSvg(p: Project, board: Board, o: BoardOpts): { svg: string;
     for (let x = 1; x < sw; x++) parts.push(`<line x1="${x}" y1="0" x2="${x}" y2="${sd}" stroke="${theme.grid}" stroke-width="${0.012 * K}"/>`)
     for (let y = 1; y < sd; y++) parts.push(`<line x1="0" y1="${y}" x2="${sw}" y2="${y}" stroke="${theme.grid}" stroke-width="${0.012 * K}"/>`)
   }
-  parts.push(`<text x="${sw / 2}" y="${-0.15 * K}" font-size="${0.22 * K}" font-family="${theme.font}" fill="${theme.muted}" text-anchor="middle">${p.lang === 'pt' ? 'FUNDO DO PALCO' : 'UPSTAGE'}</text>`)
   parts.push(`<text x="${sw / 2}" y="${sd + 0.38 * K}" font-size="${0.22 * K}" font-family="${theme.font}" fill="${theme.muted}" text-anchor="middle">${p.lang === 'pt' ? 'PLATEIA' : 'AUDIENCE'}</text>`)
   const items = p.items.filter(i => i.board === board).sort((a, b) => Number(b.kind === 'riser') - Number(a.kind === 'riser'))
   if (board === 'light') {
@@ -115,13 +119,10 @@ export function boardSvg(p: Project, board: Board, o: BoardOpts): { svg: string;
   for (const it of items) { parts.push(itemShape(it, theme, 0.02 * K, ak)); parts.push(itemLabel(it, p, theme, 0.17 * ak, undefined, ak)) }
   if (board === 'light') {
     parts.push(mountMarks(items, theme, ak))
-    const used = (['aereo', 'chao'] as const).filter(k => items.some(i => mountOf(i) === k))
-    let lx = 0
-    for (const k of used) { // legenda da cor (canto inferior esquerdo, na linha de "PLATEIA")
-      const label = p.lang === 'pt' ? MOUNT[k].pt : MOUNT[k].en
-      parts.push(`<circle cx="${lx + 0.1 * K}" cy="${sd + 0.32 * K}" r="${0.1 * K}" fill="${MOUNT[k].color}"/><text x="${lx + 0.3 * K}" y="${sd + 0.38 * K}" font-size="${0.2 * K}" font-family="${theme.font}" fill="${theme.fg}">${label}</text>`)
-      lx += (0.5 + label.length * 0.12) * K
-    }
+    used.forEach((k, i) => { // legenda: canto inferior direito, ao lado do palco
+      const lx = sw + eR - legW + 0.15 * K, ly = sd - (used.length - i) * 0.34 * K + 0.1 * K
+      parts.push(`<circle cx="${lx + 0.1 * K}" cy="${ly}" r="${0.1 * K}" fill="${MOUNT[k].color}"/><text x="${lx + 0.3 * K}" y="${ly + 0.06 * K}" font-size="${0.2 * K}" font-family="${theme.font}" fill="${theme.fg}">${mLabel(k)}</text>`)
+    })
   }
   if (o.showScale !== false) parts.push(`<g transform="translate(0 ${sd + 0.6 * K})"><line x1="0" y1="0" x2="${K}" y2="0" stroke="${theme.fg}" stroke-width="${0.04 * K}"/><text x="${1.12 * K}" y="${0.07 * K}" font-size="${0.18 * K}" font-family="${theme.font}" fill="${theme.fg}">1 m  ·  ${sw} × ${sd} m</text></g>`)
   if (legRows.length) {

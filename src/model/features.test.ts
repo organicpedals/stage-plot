@@ -5,7 +5,7 @@ vi.mock('svg2pdf.js', () => ({ svg2pdf: async () => {} }))
 import { boardSvg, MOUNT, THEMES } from '../export/boardSvg'
 import { outputColumns, powerColumns } from '../export/content'
 import { T } from '../export/pdfDoc'
-import { tone } from '../export/styles/shared'
+import { tint, tone } from '../export/styles/shared'
 import { contrast } from '../export/pdfDoc'
 import { ICON_MAP, itemParams } from '../library/icons'
 import { addMemberIfNew } from '../ui/MusicianInput'
@@ -74,6 +74,14 @@ describe('mapa de luz: marca de posição', () => {
 describe('cor de destaque', () => {
   it('ajusta o tom para contraste >= 4,5:1 em fundo claro e escuro', () => {
     for (const c of ['#FFB020', '#FFFF00', '#1D4ED8', '#000000', '#FFFFFF']) for (const bg of ['#FAF9F6', '#1C1C1E']) expect(contrast(tone(c, bg), bg), `${c} em ${bg}`).toBeGreaterThanOrEqual(4.5)
+  })
+})
+
+describe('linhas na cor de destaque', () => {
+  it('réguas/grades derivam da cor escolhida e a legenda não fica sob o palco', () => {
+    expect(tint('#FF0000', '#FFFFFF', 0.25)).toBe('#FFBFBF'); expect(tint('#FF0000', '#FFFFFF', 1)).toBe('#FF0000')
+    const p = newProject('B'); const a = newItem('ledpar', 4, 2); a.params = { ...a.params, mount: 'Aéreo' }; p.items.push(a)
+    const { svg } = boardSvg(p, 'light', { theme: THEMES.paper }); expect(svg).not.toContain('FUNDO DO PALCO'); expect(svg).toContain('Aéreo')
   })
 })
 
