@@ -1,6 +1,7 @@
 import { ICON_MAP, ParamDef, itemParams, Pv } from '../library/icons'
 import { inputList } from '../model/derive'
 import { useStore } from '../model/store'
+import { FaderField } from './ScaleField'
 import { NumInput } from './NumInput'
 import { MusicianInput } from './MusicianInput'
 import type { Item, Project } from '../model/types'
@@ -55,9 +56,9 @@ function MultiProps({ p, sel }: { p: Project; sel: Item[] }) {
         {params.map(({ d, vals }) => <ParamField key={d.key} d={d} value={vals[0]} lang={p.lang} onChange={v => each(x => { x.params = { ...x.params, [d.key]: v } })} />)}
       </div>}
       <div className="field">{pt ? 'Rotação (°)' : 'Rotation (°)'}
-        <span className="slide"><input type="range" min={-180} max={180} step={5} value={rots[0]} onChange={e => each(x => { x.rot = +e.target.value })} /><NumInput min={-360} max={360} step={5} value={rots[0]} onChange={v => each(x => { x.rot = v })} /></span></div>
+        <FaderField value={rots[0]} onChange={v => each(x => { x.rot = v })} min={-180} max={180} step={5} inMin={-360} inMax={360} unit="°" title={pt ? 'Rotação: digite, role o mouse ou clique para abrir o fader' : 'Rotation: type, scroll the mouse wheel or click to open the fader'} /></div>
       <div className="field">{pt ? 'Tamanho (×)' : 'Size (×)'}
-        <span className="slide"><input type="range" min={0.4} max={3} step={0.1} value={Math.min(3, Math.max(0.4, scales[0]))} onChange={e => each(x => { x.scale = +e.target.value })} /><NumInput min={0.1} max={10} step={0.1} value={scales[0]} onChange={v => each(x => { x.scale = v })} /></span></div>
+        <FaderField value={scales[0]} onChange={v => each(x => { x.scale = v })} min={0.4} max={3} step={0.1} inMin={0.1} inMax={10} unit="×" title={pt ? 'Tamanho: digite, role o mouse ou clique para abrir o fader' : 'Size: type, scroll the mouse wheel or click to open the fader'} /></div>
       <label title={pt ? 'Mostra ou oculta os itens no mapa e nos PDFs' : 'Show or hide the items on the plot and in the PDFs'} className="chk"><input type="checkbox" checked={sel.every(i => !i.hidden)} onChange={e => each(x => { x.hidden = !e.target.checked }, true)} /> {pt ? 'Visível no mapa' : 'Visible on map'}</label>
       <label title={pt ? 'Impede que o item seja movido por arrasto ou setas' : 'Prevents the item from being moved by drag or arrow keys'} className="chk"><input type="checkbox" checked={sel.every(i => i.locked)} onChange={e => each(x => { x.locked = e.target.checked }, true)} /> {pt ? 'Travar posição' : 'Lock position'}</label>
       <button title={pt ? 'Remove os itens selecionados do mapa (Del)' : 'Removes the selected items from the plot (Del)'} className="danger" onClick={() => { update(pr => { pr.items = pr.items.filter(i => !ids.includes(i.id)) }); select([]) }}>{pt ? `Remover ${sel.length} itens` : `Remove ${sel.length} items`}</button>
@@ -92,9 +93,9 @@ export function Props({ p }: { p: Project }) {
         {it.board === 'light' && <label title={pt ? 'Endereço DMX (universo.canal), usado no patch de luz' : 'DMX address (universe.channel), used in the light patch'}>DMX<input value={it.dmx} placeholder="1.001" onChange={e => set({ dmx: e.target.value })} /></label>}
         {chans.length > 0 && <div className="chhint"><b>{chans.length}</b> {pt ? (chans.length > 1 ? 'canais na input list' : 'canal na input list') : 'channel(s) in input list'}<small>{chans.map(c => c.ch).join(', ')}</small></div>}
         <div className="field">{pt ? 'Rotação (°)' : 'Rotation (°)'}
-          <span className="slide"><input type="range" min={-180} max={180} step={5} value={normRot(it.rot)} onChange={e => set({ rot: +e.target.value })} /><NumInput min={-360} max={360} step={5} value={Math.round(normRot(it.rot))} onChange={v => set({ rot: v })} /></span></div>
+          <FaderField value={Math.round(normRot(it.rot))} onChange={v => set({ rot: v })} min={-180} max={180} step={5} inMin={-360} inMax={360} unit="°" title={pt ? 'Rotação: digite, role o mouse ou clique para abrir o fader' : 'Rotation: type, scroll the mouse wheel or click to open the fader'} /></div>
         <div className="field">{pt ? 'Tamanho (×)' : 'Size (×)'}
-          <span className="slide"><input type="range" min={0.4} max={3} step={0.1} value={Math.min(3, Math.max(0.4, it.scale))} onChange={e => set({ scale: +e.target.value })} /><NumInput min={0.1} max={10} step={0.1} value={+it.scale.toFixed(2)} onChange={v => set({ scale: v })} /></span></div>
+          <FaderField value={+it.scale.toFixed(2)} onChange={v => set({ scale: v })} min={0.4} max={3} step={0.1} inMin={0.1} inMax={10} unit="×" title={pt ? 'Tamanho: digite, role o mouse ou clique para abrir o fader' : 'Size: type, scroll the mouse wheel or click to open the fader'} /></div>
         <label title={pt ? 'Observação do item: vai para a coluna de notas das listas' : 'Item remark: goes to the notes column of the lists'}>{pt ? 'Anotação' : 'Note'}<textarea rows={2} value={it.note} onChange={e => set({ note: e.target.value })} /></label>
         <label title={pt ? 'Mostra ou oculta o item no mapa e nos PDFs' : 'Show or hide the item on the plot and in the PDFs'} className="chk"><input type="checkbox" checked={!it.hidden} onChange={e => set({ hidden: !e.target.checked }, true)} /> {pt ? 'Visível no mapa' : 'Visible on map'}</label>
         <label title={pt ? 'Impede que o item seja movido por arrasto ou setas' : 'Prevents the item from being moved by drag or arrow keys'} className="chk"><input type="checkbox" checked={it.locked} onChange={e => set({ locked: e.target.checked }, true)} /> {pt ? 'Travar posição' : 'Lock position'}</label>

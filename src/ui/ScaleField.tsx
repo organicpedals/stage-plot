@@ -1,16 +1,21 @@
 import { useEffect, useRef, useState } from 'react'
 
-/** Campo numérico estilo Photoshop: digitar, rolar o mouse sobre ele, ou clicar para abrir o fader. */
-export function ScaleField({ value, onChange, min = 0.5, max = 2, step = 0.05, label, title }: {
-  value: number; onChange: (v: number) => void; min?: number; max?: number; step?: number; label: string; title?: string
+/** Motor único de todos os faders do app (estilo Photoshop): digitar, rolar o mouse sobre o campo
+ *  ou clicar para abrir o fader. `mult` converte valor interno ↔ exibido (ex.: 100 para %). */
+export function FaderField({ value, onChange, min, max, step, inMin = min, inMax = max, unit = '', mult = 1, label, title }: {
+  value: number; onChange: (v: number) => void
+  min: number; max: number; step: number // faixa do fader, roda e setas
+  inMin?: number; inMax?: number // faixa aceita ao digitar
+  unit?: string; mult?: number; label?: string; title?: string
 }) {
   const [open, setOpen] = useState(false)
   const [draft, setDraft] = useState<string | null>(null)
   const box = useRef<HTMLSpanElement>(null)
   const input = useRef<HTMLInputElement>(null)
-  const clamp = (v: number) => Math.min(max, Math.max(min, Math.round(v / step) * step))
-  const live = useRef({ value, onChange, clamp })
-  live.current = { value, onChange, clamp }
+  const fix = (v: number) => +v.toFixed(4)
+  const clamp = (v: number, lo = inMin, hi = inMax) => Math.min(hi, Math.max(lo, fix(v)))
+  const live = useRef({ value, onChange })
+  live.current = { value, onChange }
 
   // roda do mouse: listener não passivo para impedir a rolagem da página
   useEffect(() => {
@@ -18,12 +23,13 @@ export function ScaleField({ value, onChange, min = 0.5, max = 2, step = 0.05, l
     if (!el) return
     const wheel = (e: WheelEvent) => {
       e.preventDefault()
-      const { value: v, onChange: set, clamp: cl } = live.current
-      set(cl(v + (e.deltaY < 0 ? step : -step)))
+      const { value: v, onChange: set } = live.current
+      set(clamp(Math.round(v / step) * step + (e.deltaY < 0 ? step : -step)))
     }
     el.addEventListener('wheel', wheel, { passive: false })
     return () => el.removeEventListener('wheel', wheel)
-  }, [step])
+    // eslint-disable-next-line react-hooks/exhaustive-deps
+  }, [step, inMin, inMax])
 
   // fecha ao clicar fora ou com Esc
   useEffect(() => {
@@ -35,19 +41,19 @@ export function ScaleField({ value, onChange, min = 0.5, max = 2, step = 0.05, l
   }, [open])
 
   const commit = () => {
-    if (draft !== null) { const n = parseFloat(draft.replace(',', '.')); if (Number.isFinite(n)) onChange(clamp(n / 100)) }
+    if (draft !== null) { const n = parseFloat(draft.replace(',', '.')); if (Number.isFinite(n)) onChange(clamp(n / mult)) }
     setDraft(null)
   }
-  const pct = Math.round(value * 100)
+  const shown = +(value * mult).toFixed(mult === 1 ? 2 : 0)
 
   return (
     <span className="scalefield" ref={box} title={title}>
-      <span className="sf-label">{label}</span>
+      {label && <span className="sf-label">{label}</span>}
       <input
-        ref={input} className="mono sf-input" inputMode="decimal" aria-label={label} value={draft ?? `${pct}%`}
-        onFocus={e => { setOpen(true); setDraft(String(pct)); e.currentTarget.select() }}
+        ref={input} className="mono sf-input" inputMode="decimal" aria-label={label ?? title} value={draft ?? `${shown}${unit}`}
+        onFocus={e => { setOpen(true); setDraft(String(shown)); e.currentTarget.select() }}
         onClick={() => setOpen(true)}
-        onChange={e => setDraft(e.target.value.replace(/[^\d.,]/g, ''))}
+        onChange={e => setDraft(e.target.value.replace(/[^\d.,-]/g, ''))}
         onBlur={commit}
         onKeyDown={e => {
           if (e.key === 'Enter') { commit(); e.currentTarget.blur() }
@@ -58,9 +64,13 @@ export function ScaleField({ value, onChange, min = 0.5, max = 2, step = 0.05, l
       />
       {open && (
         <span className="sf-pop" role="dialog">
-          <input type="range" min={min} max={max} step={step} value={value} onChange={e => { onChange(+e.target.value); setDraft(null) }} aria-label={label} />
+          <input type="range" min={min} max={max} step={step} value={Math.min(max, Math.max(min, value))} onChange={e => { onChange(+e.target.value); setDraft(null) }} aria-label={label ?? title} />
         </span>
       )}
     </span>
   )
 }
+
+/** Tamanho global dos ícones (em %). */
+export const ScaleField = (p: { value: number; onChange: (v: number) => void; label?: string; title?: string }) =>
+  <FaderField {...p} min={0.5} max={2} step={0.05} unit="%" mult={100} />

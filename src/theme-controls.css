@@ -54,3 +54,6 @@ input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 
 .scalefield .sf-pop { position: absolute; top: calc(100% + 6px); left: 0; z-index: 30; background: var(--panel); border: 1px solid var(--line2); border-radius: 8px; padding: 8px 12px; box-shadow: 0 8px 24px #0005 }
 .scalefield .sf-pop input[type=range] { width: 160px; display: block }
 [data-skin='apple'] .scalefield .sf-pop { border-radius: 12px; border-width: .5px; backdrop-filter: saturate(180%) blur(20px) }
+.props .scalefield .sf-pop { left: auto; right: 0 }
+.props .scalefield { display: flex }
+.props .scalefield .sf-input { width: 76px; text-align: left }
