@@ -1,0 +1,141 @@
+<!doctype html>
+<html lang="pt-BR">
+<head>
+<meta charset="utf-8">
+<title>Editor do ícone de bateria (shell pack, vista superior)</title>
+<meta name="viewport" content="width=device-width,initial-scale=1">
+<style>
+  :root { color-scheme: light; font-family: Inter, 'Segoe UI', system-ui, sans-serif; }
+  body { margin: 0; display: grid; grid-template-columns: 290px 1fr; height: 100vh; background: #f5f5f5; color: #1e1e1e; font-size: 13px }
+  aside { background: #fff; border-right: 1px solid #e3e3e3; padding: 14px; overflow: auto }
+  h1 { font-size: 14px; margin: 0 0 4px } h2 { font-size: 11px; text-transform: uppercase; letter-spacing: .06em; color: #777; margin: 16px 0 6px }
+  p { color: #666; margin: 4px 0 10px; line-height: 1.45 }
+  .row { display: flex; gap: 6px; align-items: center; margin: 4px 0 } .row b { width: 64px; font-weight: 500 }
+  .seg { display: inline-flex; background: #ececec; border-radius: 8px; padding: 2px; gap: 2px }
+  .seg button { border: 0; background: transparent; border-radius: 6px; padding: 4px 10px; cursor: pointer; font: inherit }
+  .seg button.on { background: #fff; box-shadow: 0 1px 3px #0003; font-weight: 600 }
+  button.act { border: 1px solid #d0d0d0; background: #fff; border-radius: 6px; padding: 6px 10px; cursor: pointer; font: inherit; margin: 2px 4px 2px 0 }
+  button.act:hover { border-color: #0d99ff } button.pri { background: #0d99ff; border-color: #0d99ff; color: #fff }
+  textarea { width: 100%; height: 190px; font: 11px ui-monospace, Consolas, monospace; border: 1px solid #ddd; border-radius: 6px; padding: 6px; box-sizing: border-box; background: #fafafa }
+  main { position: relative; overflow: hidden }
+  svg { width: 100%; height: 100%; display: block; touch-action: none; user-select: none }
+  .piece { cursor: grab } .piece:active { cursor: grabbing }
+  .sel > .ring { stroke: #0d99ff !important; stroke-width: 1.4 !important }
+  #info { position: absolute; left: 12px; bottom: 10px; background: #fffc; border: 1px solid #ddd; border-radius: 6px; padding: 4px 8px; font: 12px ui-monospace, Consolas, monospace }
+</style>
+</head>
+<body>
+<aside>
+  <h1>Editor da bateria</h1>
+  <p>Vista superior: baterista embaixo, plateia em cima. Arraste as peças para onde ficam numa montagem real. As posições são em centímetros e ficam salvas neste navegador.</p>
+  <h2>Configuração a editar</h2>
+  <div class="row"><b>Bumbos</b><span class="seg" id="sK"></span></div>
+  <div class="row"><b>Tons</b><span class="seg" id="sT"></span></div>
+  <div class="row"><b>Surdos</b><span class="seg" id="sF"></span></div>
+  <p>Cada quantidade tem sua própria disposição: ao trocar de 2 para 3 tons, você posiciona os 3 tons desse caso.</p>
+  <h2>Ações</h2>
+  <button class="act" id="reset">Restaurar padrão desta config.</button>
+  <button class="act" id="grid">Grade: 1 cm</button>
+  <p>Setas movem 1 cm (Shift = 5 cm). Clique numa peça para selecionar.</p>
+  <h2>Resultado (JSON)</h2>
+  <textarea id="out" readonly></textarea>
+  <button class="act pri" id="copy">Copiar JSON</button>
+</aside>
+<main>
+  <svg id="sv" viewBox="-160 -60 320 230"></svg>
+  <div id="info">—</div>
+</main>
+<script>
+const KEY = 'stageplot.drumlayout.v1'
+const SNAP = { v: 1 }
+const KD = 40, KW = 56
+const TOM_IN = { 0: [], 1: [12], 2: [10, 12], 3: [10, 12, 13], 4: [8, 10, 12, 13] }
+const R = inch => +(inch * 2.54 / 2).toFixed(2)
+const round = v => Math.round(v / SNAP.v) * SNAP.v
+
+/* padrão inicial: o mesmo algoritmo atual do app (ponto de partida para você ajustar) */
+function defaults() {
+  const d = { kick: {}, toms: {}, snare: [-12, 92], floors: {} }
+  for (const k of [1, 2]) d.kick[k] = Array.from({ length: k }, (_, i) => [(i - (k - 1) / 2) * 60, 0])
+  for (const t of [0, 1, 2, 3, 4]) {
+    const rs = TOM_IN[t].map(R), gap = 3, total = rs.reduce((a, r) => a + 2 * r, 0) + gap * Math.max(0, rs.length - 1)
+    let cx = -total / 2; const arr = []
+    rs.forEach((r, i) => { cx += r; arr.push([+cx.toFixed(1), +(KD + 10 + r * 0.6 + Math.abs(i - (rs.length - 1) / 2) * 1.2).toFixed(1)]); cx += r + gap })
+    d.toms[t] = arr
+  }
+  d.floors[1] = [[62, 90]]; d.floors[2] = [[62, 90], [104, 90]]; d.floors[0] = []
+  return d
+}
+let L = (() => { try { return Object.assign(defaults(), JSON.parse(localStorage.getItem(KEY) || '{}')) } catch { return defaults() } })()
+const cfg = { k: 1, t: 2, f: 1 }
+let sel = null // {kind, i}
+
+const sv = document.getElementById('sv')
+const NS = 'http://www.w3.org/2000/svg'
+const el = (n, a = {}, p) => { const e = document.createElementNS(NS, n); for (const k in a) e.setAttribute(k, a[k]); if (p) p.appendChild(e); return e }
+
+function seg(id, vals, key) {
+  const box = document.getElementById(id); box.innerHTML = ''
+  for (const v of vals) { const b = document.createElement('button'); b.textContent = v; b.className = cfg[key] === v ? 'on' : ''; b.onclick = () => { cfg[key] = v; sel = null; draw() }; box.appendChild(b) }
+}
+
+function drumShape(g, r, lugs = 8, tag) {
+  el('circle', { r: r + 1.6, fill: '#fff', stroke: '#111', 'stroke-width': 1, class: 'ring' }, g)
+  el('circle', { r: r - 1.5, fill: 'none', stroke: '#111', 'stroke-width': .5 }, g)
+  el('circle', { r: r * .42, fill: 'none', stroke: '#111', 'stroke-width': .45 }, g)
+  for (let i = 0; i < lugs; i++) { const a = i * 2 * Math.PI / lugs + .2; el('line', { x1: Math.cos(a) * (r + 1.6), y1: Math.sin(a) * (r + 1.6), x2: Math.cos(a) * (r + 3.6), y2: Math.sin(a) * (r + 3.6), stroke: '#111', 'stroke-width': .9, 'stroke-linecap': 'round' }, g) }
+  if (tag) { const t = el('text', { y: 3, 'text-anchor': 'middle', 'font-size': 7, fill: '#888', 'pointer-events': 'none' }, g); t.textContent = tag }
+}
+function kickShape(g) {
+  el('rect', { x: -KW / 2, y: 0, width: KW, height: KD, rx: 3, fill: '#fff', stroke: '#111', 'stroke-width': 1, class: 'ring' }, g)
+  el('line', { x1: -KW / 2, y1: 4, x2: KW / 2, y2: 4, stroke: '#111', 'stroke-width': .7 }, g); el('line', { x1: -KW / 2, y1: KD - 4, x2: KW / 2, y2: KD - 4, stroke: '#111', 'stroke-width': .7 }, g)
+  for (let j = 0; j < 5; j++) el('line', { x1: -20 + j * 10, y1: 4, x2: -20 + j * 10, y2: KD - 4, stroke: '#111', 'stroke-width': .4 }, g)
+  const t = el('text', { y: KD / 2 + 3, 'text-anchor': 'middle', 'font-size': 8, fill: '#888', 'pointer-events': 'none' }, g); t.textContent = 'Bumbo 22"'
+}
+
+function pieces() {
+  const out = []
+  L.kick[cfg.k].forEach((p, i) => out.push({ kind: 'kick', i, pos: p, w: KW, h: KD }))
+  const inch = TOM_IN[cfg.t]; (L.toms[cfg.t] || []).forEach((p, i) => out.push({ kind: 'toms', i, pos: p, r: R(inch[i]), tag: inch[i] + '"' }))
+  out.push({ kind: 'snare', i: 0, pos: L.snare, r: R(14), tag: 'Caixa 14"' })
+  const fin = [16, 14]; (L.floors[cfg.f] || []).forEach((p, i) => out.push({ kind: 'floors', i, pos: p, r: R(fin[i]), tag: 'Surdo ' + fin[i] + '"' }))
+  return out
+}
+const getPos = (kind, i) => kind === 'snare' ? L.snare : kind === 'kick' ? L.kick[cfg.k][i] : kind === 'toms' ? L.toms[cfg.t][i] : L.floors[cfg.f][i]
+
+function draw() {
+  seg('sK', [1, 2], 'k'); seg('sT', [0, 1, 2, 3, 4], 't'); seg('sF', [0, 1, 2], 'f')
+  sv.innerHTML = ''
+  // grade de 10 cm, eixos e baterista
+  for (let x = -160; x <= 160; x += 10) el('line', { x1: x, y1: -60, x2: x, y2: 170, stroke: x % 50 === 0 ? '#d6d6d6' : '#ececec', 'stroke-width': x % 50 === 0 ? .5 : .3 }, sv)
+  for (let y = -60; y <= 170; y += 10) el('line', { x1: -160, y1: y, x2: 160, y2: y, stroke: y % 50 === 0 ? '#d6d6d6' : '#ececec', 'stroke-width': y % 50 === 0 ? .5 : .3 }, sv)
+  el('line', { x1: 0, y1: -60, x2: 0, y2: 170, stroke: '#bcd9f5', 'stroke-width': .6, 'stroke-dasharray': '3 3' }, sv)
+  el('circle', { cx: 0, cy: 138, r: 17, fill: 'none', stroke: '#bbb', 'stroke-width': .8, 'stroke-dasharray': '3 3' }, sv)
+  let t = el('text', { x: 0, y: 141, 'text-anchor': 'middle', 'font-size': 8, fill: '#aaa' }, sv); t.textContent = 'baterista'
+  t = el('text', { x: 0, y: -48, 'text-anchor': 'middle', 'font-size': 8, fill: '#aaa' }, sv); t.textContent = '↑ plateia'
+  for (const p of pieces()) {
+    const g = el('g', { class: 'piece' + (sel && sel.kind === p.kind && sel.i === p.i ? ' sel' : ''), transform: `translate(${p.pos[0]} ${p.pos[1]})` }, sv)
+    if (p.kind === 'kick') kickShape(g); else drumShape(g, p.r, p.kind === 'snare' ? 10 : 8, p.tag)
+    g.dataset.kind = p.kind; g.dataset.i = p.i
+    g.addEventListener('pointerdown', e => start(e, p, g))
+  }
+  document.getElementById('out').value = JSON.stringify({ unidade: 'cm', origem: 'centro-topo do bumbo (x→direita, y→baterista)', kick: L.kick, toms: L.toms, snare: L.snare, floors: L.floors }, null, 1).replace(/\n\s+(?=[\d\-\[\]])/g, ' ')
+  localStorage.setItem(KEY, JSON.stringify(L)); localStorage.setItem(KEY + '.cfg', JSON.stringify(cfg))
+  info()
+}
+function info() { const e = document.getElementById('info'); if (!sel) { e.textContent = `bumbos ${cfg.k} · tons ${cfg.t} · surdos ${cfg.f}`; return } const p = getPos(sel.kind, sel.i); e.textContent = `${sel.kind} ${sel.i + 1}: x ${p[0]} cm · y ${p[1]} cm` }
+
+let drag = null
+function pt(e) { const m = sv.getScreenCTM().inverse(); const q = new DOMPoint(e.clientX, e.clientY).matrixTransform(m); return [q.x, q.y] }
+function start(e, p, g) { e.preventDefault(); sel = { kind: p.kind, i: p.i }; const [x, y] = pt(e), pos = getPos(p.kind, p.i); drag = { p, dx: x - pos[0], dy: y - pos[1] }; g.setPointerCapture(e.pointerId); draw() }
+sv.addEventListener('pointermove', e => { if (!drag) return; const [x, y] = pt(e), pos = getPos(drag.p.kind, drag.p.i); pos[0] = round(x - drag.dx); pos[1] = round(y - drag.dy); const g = sv.querySelector(`g.piece[data-kind="${drag.p.kind}"][data-i="${drag.p.i}"]`); if (g) g.setAttribute('transform', `translate(${pos[0]} ${pos[1]})`); info() })
+sv.addEventListener('pointerup', () => { if (drag) { drag = null; draw() } })
+sv.addEventListener('pointerdown', e => { if (e.target === sv || e.target.tagName === 'line') { sel = null; draw() } })
+addEventListener('keydown', e => { if (!sel) return; const s = e.shiftKey ? 5 : 1, p = getPos(sel.kind, sel.i); if (e.key === 'ArrowLeft') p[0] -= s; else if (e.key === 'ArrowRight') p[0] += s; else if (e.key === 'ArrowUp') p[1] -= s; else if (e.key === 'ArrowDown') p[1] += s; else return; e.preventDefault(); draw() })
+document.getElementById('reset').onclick = () => { const d = defaults(); L.kick[cfg.k] = d.kick[cfg.k]; L.toms[cfg.t] = d.toms[cfg.t]; L.floors[cfg.f] = d.floors[cfg.f]; L.snare = d.snare; sel = null; draw() }
+document.getElementById('grid').onclick = e => { SNAP.v = SNAP.v === 1 ? 0.5 : SNAP.v === 0.5 ? 5 : 1; e.target.textContent = `Grade: ${SNAP.v} cm` }
+document.getElementById('copy').onclick = e => { navigator.clipboard?.writeText(document.getElementById('out').value); e.target.textContent = 'Copiado'; setTimeout(() => e.target.textContent = 'Copiar JSON', 1200) }
+draw()
+</script>
+</body>
+</html>
