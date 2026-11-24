@@ -82,3 +82,64 @@ tr.manual td:first-child { box-shadow: inset 2px 0 var(--amber) }
 .error, button.danger { color: var(--danger) }
 .swatch, .accent-row input[type=color] { border-color: var(--line2) }
 button:focus-visible, .card:focus-visible, .btn:focus-within { outline-color: var(--amber) }
+
+/* ===== Estilo "Apple" (macOS): escolhido em data-skin="apple"; claro/escuro via data-theme ===== */
+:root[data-skin='apple'][data-theme='dark'] {
+  --bg: #1c1c1e; --panel: #2c2c2e; --line: #3a3a3c; --line2: #48484a; --fg: #f5f5f7; --muted: #98989f;
+  --amber: #0a84ff; --cyan: #64d2ff; --danger: #ff453a; --r: 10px;
+  --field: #3a3a3c; --cv: #161618; --dot: #2c2c2e; --frame: #636366; --hover: #3a3a3c; --selbg: #0a84ff33; --selfg: #64b5ff;
+  --pop: #3a3a3c; --pop-bd: #545458; --shadow: 0 12px 36px #000a; --warnbg: #3a3012; --warnbd: #6a5a18; --warnfg: #ffd60a; --okbg: #0a84ff22; --okbd: #0a84ff66;
+  --side: #242426cc; --seg: #1c1c1e; --segon: #636366; --green: #30d158;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI Variable', 'Segoe UI', Inter, system-ui, sans-serif;
+}
+:root[data-skin='apple'][data-theme='light'] {
+  --bg: #f2f2f7; --panel: #ffffff; --line: #e5e5ea; --line2: #d1d1d6; --fg: #1c1c1e; --muted: #8e8e93;
+  --amber: #007aff; --cyan: #0a6fd6; --danger: #ff3b30; --r: 10px;
+  --field: #f2f2f7; --cv: #e9e9ee; --dot: #d1d1d6; --frame: #c7c7cc; --hover: #f2f2f7; --selbg: #007aff1f; --selfg: #0062cc;
+  --pop: #ffffff; --pop-bd: #d1d1d6; --shadow: 0 12px 36px #0003; --warnbg: #fff8e1; --warnbd: #f2d98a; --warnfg: #7a5a00; --okbg: #007aff14; --okbd: #007aff55;
+  --side: #f7f7fbcc; --seg: #e3e3e8; --segon: #ffffff; --green: #34c759;
+  font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI Variable', 'Segoe UI', Inter, system-ui, sans-serif;
+}
+[data-skin='apple'] body { font-size: 13px; letter-spacing: -.003em }
+[data-skin='apple'] button { border-radius: 8px; border-color: var(--line); box-shadow: 0 1px 0 #0000000d }
+[data-skin='apple'] button:hover:not(:disabled) { border-color: var(--line2); background: var(--hover) }
+[data-skin='apple'] button.primary { background: var(--amber); border-color: var(--amber); color: #fff; box-shadow: none }
+[data-skin='apple'] button.primary:hover:not(:disabled) { filter: brightness(1.08); background: var(--amber); border-color: var(--amber) }
+[data-skin='apple'] button.ghost { box-shadow: none; border-color: transparent }
+[data-skin='apple'] input, [data-skin='apple'] select, [data-skin='apple'] textarea { border-radius: 8px; border: 1px solid transparent; background: var(--field) }
+[data-skin='apple'] input:focus, [data-skin='apple'] textarea:focus, [data-skin='apple'] select:focus { box-shadow: 0 0 0 3px color-mix(in srgb, var(--amber) 35%, transparent); border-color: var(--amber) }
+
+/* cabeçalho: barra de título + controle segmentado */
+[data-skin='apple'] .top { background: var(--side); backdrop-filter: saturate(180%) blur(20px); border-bottom: 1px solid var(--line); padding: 8px 14px; gap: 10px }
+[data-skin='apple'] .tabs { background: var(--seg); padding: 2px; border-radius: 9px; gap: 2px }
+[data-skin='apple'] .tabs button { border-radius: 7px; padding: 4px 14px; color: var(--fg); box-shadow: none; font-weight: 500 }
+[data-skin='apple'] .tabs button:hover:not(:disabled) { background: transparent; color: var(--fg) }
+[data-skin='apple'] .tabs button.on { background: var(--segon); color: var(--fg); box-shadow: 0 1px 3px #0003, 0 0 0 .5px #0001 }
+
+/* barras laterais translúcidas, títulos pequenos em caixa alta */
+[data-skin='apple'] .palette, [data-skin='apple'] .props { background: var(--side); backdrop-filter: saturate(180%) blur(20px) }
+[data-skin='apple'] .palette > .panel-title, [data-skin='apple'] .props > .panel-title { background: transparent; border-bottom: 0; font-size: 11px; font-weight: 600; text-transform: uppercase; letter-spacing: .06em; color: var(--muted); padding-top: 14px }
+[data-skin='apple'] .pal-search { background: transparent; top: 40px }
+[data-skin='apple'] .pal-search input { background: var(--seg); border-radius: 9px }
+[data-skin='apple'] h4 { text-transform: uppercase; font-size: 11px; letter-spacing: .06em; color: var(--muted) }
+[data-skin='apple'] .ico { border-radius: 10px; background: var(--panel); border: .5px solid var(--line); box-shadow: 0 1px 2px #0000001a }
+[data-skin='apple'] .ico:hover:not(:disabled) { border-color: var(--amber); background: var(--panel) }
+/* inspetor em grupos inset */
+[data-skin='apple'] .parbox { background: var(--panel); border: .5px solid var(--line); border-radius: 10px; box-shadow: 0 1px 2px #0000000d }
+[data-skin='apple'] .chhint { border-radius: 10px; background: var(--okbg); border: 0 }
+[data-skin='apple'] .canvas-tools { background: var(--side); backdrop-filter: blur(20px); border-bottom: 1px solid var(--line) }
+
+/* interruptores verdes no lugar de caixas de seleção */
+[data-skin='apple'] input[type=checkbox] { appearance: none; -webkit-appearance: none; width: 34px; height: 20px; border-radius: 10px; background: var(--line2); position: relative; cursor: pointer; transition: background .15s; border: 0; flex: none; vertical-align: middle }
+[data-skin='apple'] input[type=checkbox]::after { content: ''; position: absolute; top: 2px; left: 2px; width: 16px; height: 16px; border-radius: 50%; background: #fff; box-shadow: 0 1px 3px #0004; transition: transform .15s }
+[data-skin='apple'] input[type=checkbox]:checked { background: var(--green) }
+[data-skin='apple'] input[type=checkbox]:checked::after { transform: translateX(14px) }
+[data-skin='apple'] input[type=checkbox]:focus-visible { box-shadow: 0 0 0 3px color-mix(in srgb, var(--amber) 35%, transparent) }
+
+/* cartões, tabelas, popovers */
+[data-skin='apple'] .sec, [data-skin='apple'] .card { border-radius: 12px; border: .5px solid var(--line); box-shadow: 0 1px 3px #0000001a }
+[data-skin='apple'] .card.new { box-shadow: none; border-style: dashed }
+[data-skin='apple'] .vis-panel, [data-skin='apple'] .mus-list { border-radius: 12px; backdrop-filter: blur(20px) }
+[data-skin='apple'] .logo { border-radius: 8px }
+[data-skin='apple'] button.danger { color: var(--danger); background: transparent }
+[data-skin='apple'] thead th { text-transform: uppercase; font-size: 10.5px; letter-spacing: .05em }

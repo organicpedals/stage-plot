@@ -10,7 +10,7 @@ import { Palette } from './Palette'
 import { Props } from './Props'
 import { InfoTab, InputsTab, RiderTab } from './Tabs'
 import { ExportTab } from './ExportTab'
-import { useTheme } from './theme'
+import { useTheme, SKINS, type Skin } from './theme'
 
 type Tab = 'stage' | 'light' | 'inputs' | 'rider' | 'info' | 'export'
 
@@ -18,6 +18,16 @@ function ThemeToggle({ lang }: { lang: 'pt' | 'en' }) {
   const { mode, toggle } = useTheme()
   const pt = lang === 'pt'
   return <button className="ghost themebtn" onClick={toggle} title={pt ? 'Alternar tema claro/escuro' : 'Toggle light/dark theme'} aria-label={pt ? 'Alternar tema' : 'Toggle theme'}>{mode === 'light' ? (pt ? '☾ Escuro' : '☾ Dark') : (pt ? '☀ Claro' : '☀ Light')}</button>
+}
+
+function SkinSelect({ lang }: { lang: 'pt' | 'en' }) {
+  const { skin, setSkin } = useTheme()
+  return (
+    <label className="iconstyle" title={lang === 'pt' ? 'Estilo da interface' : 'Interface style'}>
+      {lang === 'pt' ? 'Interface' : 'UI'}
+      <select value={skin} onChange={e => setSkin(e.target.value as Skin)}>{SKINS.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}</select>
+    </label>
+  )
 }
 
 function IconStyleSelect({ lang }: { lang: 'pt' | 'en' }) {
@@ -42,7 +52,7 @@ function Home() {
   }
   return (
     <div className="home">
-      <header className="brand"><span className="logo" />Stage Plot<small>mapas de palco · luz · rider técnico</small><span className="sp" /><ThemeToggle lang="pt" /><IconStyleSelect lang="pt" /></header>
+      <header className="brand"><span className="logo" />Stage Plot<small>mapas de palco · luz · rider técnico</small><span className="sp" /><SkinSelect lang="pt" /><ThemeToggle lang="pt" /><IconStyleSelect lang="pt" /></header>
       <div className="grid">
         <button className="card new" onClick={() => addProject(newProject('Nova banda'))}><b>+</b> Novo projeto</button>
         <label className="card new"><b>↥</b> Importar projetos (.json)<input type="file" accept=".json,application/json" multiple hidden onChange={fileIn} /></label>
@@ -101,6 +111,7 @@ function Editor({ p }: { p: Project }) {
         <span className="sp" />
         <button className="ghost" disabled={!past.length} onClick={undo} title="Ctrl+Z">↶</button>
         <button className="ghost" disabled={!future.length} onClick={redo} title="Ctrl+Y">↷</button>
+        <SkinSelect lang={p.lang} />
         <ThemeToggle lang={p.lang} />
         <IconStyleSelect lang={p.lang} />
         <select value={p.lang} onChange={e => update(pr => { pr.lang = e.target.value as 'pt' | 'en' })}><option value="pt">PT</option><option value="en">EN</option></select>
