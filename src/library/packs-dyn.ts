@@ -125,7 +125,17 @@ function wedge(P: Params): Glyph {
   return { w: w + 2, h: d + 2, d: place(1, 1, s) }
 }
 
+// ---------- in-ear (bodypack + fones), versão contorno da silhueta ----------
+function iem(): Glyph {
+  const E = (cx: number, cy: number, rx: number, ry: number, m = 0.9) => `<ellipse cx="${cx}" cy="${cy}" rx="${rx}" ry="${ry}" fill="none" stroke="$I" stroke-width="$L(${m})"/>`
+  let d = R(11, 11, 19, 26, 3.2, 1) + R(14.4, 15.2, 12.8, 8, 1.1, 0.7) + C(17.6, 29.6, 1.9, 0.8) + C(24, 29.6, 1.9, 0.8) + C(20.8, 19.2, 1.1, 0.6, '$A')
+  d += sk('M25.6 11V2.4M14.4 2.4h11.2', 1.1) + E(6.4, 8, 3.2, 4.2) + E(35.2, 8, 3.2, 4.2, 0.9)
+  d += '<path d="M6.4 12.2C6.4 20 8 24 11 26M35.2 12.2C35.2 22 33 28 30 30" fill="transparent" stroke="$I" stroke-width="$L(0.6)" stroke-linecap="round"/>' // cabos (sem preenchimento)
+  return { w: 42, h: 40, d }
+}
+
 export const DYN: Record<string, (P: Params) => Glyph> = {
+  iem,
   guitar_amp: P => cabinet(N(P, 'speakers', 2), N(P, 'size', 12), B(P, 'head'), false),
   bass_amp: P => cabinet(N(P, 'speakers', 4), N(P, 'size', 10), B(P, 'head'), true),
   drums, perc, keys, wedge,
