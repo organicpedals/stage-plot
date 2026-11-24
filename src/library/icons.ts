@@ -242,18 +242,16 @@ const acoustic: IconDef = {
 }
 
 const eGuitar: IconDef = {
-  id: 'eguitar', cat: 'inst', board: 'stage', label: { pt: 'Guitarra elétrica', en: 'Electric guitar' },
-  params: [sel('strings', 'Cordas', 'Strings', '6', ['6', '7', '8']), bool('di', 'Linha direta (DI, sem ampli)', 'Direct line (DI, no amp)', false)],
+  id: 'eguitar', cat: 'inst', board: 'stage', label: { pt: 'Guitarra (Stratocaster)', en: 'Electric guitar (Stratocaster)' },
+  params: [bool('di', 'Linha direta (DI, sem ampli)', 'Direct line (DI, no amp)', false)],
   build: () => mk(34, 76, rr(14, 1, 7, 12, 2, 0.12) + rr(15.5, 13, 4, 28, 1) + pa('M17.5 40 C27 36 31 42 28 48 C33 52 32 64 24 70 C20 73 15 73 11 70 C3 64 2 52 7 48 C4 42 8 36 17.5 40Z') + ln(11, 56, 24, 56) + ln(11, 61, 24, 61) + dotA(17.5, 66, 2)),
-  spec: P => `${S(P, 'strings')} ${'cordas'}`,
   channels: (P, base, t) => (B(P, 'di') ? [{ name: base || t('Guitarra', 'Guitar'), mic: 'DI', stand: '-' }] : []),
 }
 
 const eBass: IconDef = {
-  id: 'ebass', cat: 'inst', board: 'stage', label: { pt: 'Baixo elétrico', en: 'Electric bass' },
-  params: [sel('strings', 'Cordas', 'Strings', '4', ['4', '5', '6']), bool('di', 'Linha direta (DI)', 'Direct line (DI)', true)],
+  id: 'ebass', cat: 'inst', board: 'stage', label: { pt: 'Baixo (Jazz Bass)', en: 'Electric bass (Jazz Bass)' },
+  params: [bool('di', 'Linha direta (DI)', 'Direct line (DI)', true)],
   build: () => mk(34, 92, rr(14.5, 1, 6, 14, 2, 0.12) + rr(15, 15, 5, 38, 1) + pa('M17.5 52 C27 48 31 54 28 60 C33 64 32 78 24 85 C20 88 15 88 11 85 C3 78 2 64 7 60 C4 54 8 48 17.5 52Z') + ln(11, 66, 24, 66) + ln(11, 72, 24, 72) + dotA(17.5, 79, 2)),
-  spec: P => `${S(P, 'strings')} ${'cordas'}`,
   channels: (P, base, t) => (B(P, 'di') ? [{ name: base || t('Baixo', 'Bass'), mic: 'DI', stand: '-' }] : []),
 }
 

@@ -20,8 +20,7 @@ describe('pacote D (semi-realista, muda com a configuração)', () => {
     expect(build('drums', { toms: 2 }).svg).toBe(base)
     expect(build('drums', { toms: 4 }).svg).not.toBe(build('drums', { toms: 1 }).svg)
   })
-  it('guitarra/baixo: cordas mudam o glifo; spot acompanha o tamanho', () => {
-    expect(build('eguitar', { strings: '6' }).svg).not.toBe(build('eguitar', { strings: '8' }).svg)
+  it('guitarra/baixo: baixo é mais longo; spot acompanha o tamanho', () => {
     expect(build('ebass', { strings: '4' }).h).toBeGreaterThan(build('eguitar', {}).h)
     expect(build('wedge', { size: '15' }).w).toBeGreaterThan(build('wedge', { size: '10' }).w)
   })

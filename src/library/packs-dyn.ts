@@ -110,34 +110,106 @@ function keys(P: Params): Glyph {
   return { w: W + 2, h: units * gap + 0, d: place(1, 1, range(units).map(u => place(0, u * gap, one)).join('')) }
 }
 
-// ---------- guitarra / baixo elétricos (vista frontal, braço para cima) ----------
-function electric(bass: boolean, strings: number): Glyph {
-  const cx = 17.5, W = 35
-  const hs = bass ? 22 : 18, nutY = hs, neckL = bass ? 56 : 42, bodyTop = nutY + neckL - 6, bodyL = bass ? 52 : 46, H = bodyTop + bodyL + 2
-  const nw = bass ? 6 : 4.8, bridgeY = bodyTop + bodyL - (bass ? 17 : 15)
+// ---------- Stratocaster e Jazz Bass (vista frontal, braço para cima, só contorno) ----------
+type Pt = [number, number]
+const f2 = (n: number) => n.toFixed(2)
+// contorno fechado a partir de uma lista de segmentos cúbicos [c1, c2, fim] (coordenadas relativas ao eixo cx)
+const outline = (cx: number, start: Pt, segs: [Pt, Pt, Pt][]) =>
+  `M${f2(cx + start[0])} ${f2(start[1])}` + segs.map(s => 'C' + s.map(p => `${f2(cx + p[0])} ${f2(p[1])}`).join(' ')).join('') + 'Z'
+
+function neckFrets(cx: number, nutY: number, scale: number, nFrets: number, wNut: number, wEnd: number, endY: number, marks: number[]) {
   let s = ''
-  // cabeça com tarraxas
-  s += R(cx - 3.8, 0, 7.6, hs, 3.2)
-  const half = Math.ceil(strings / 2)
-  range(strings).forEach(i => { const left = i < half, k = left ? i : i - half, y = 3.4 + k * ((hs - 8) / Math.max(1, half - 1)); s += C(left ? cx - 5.6 : cx + 5.6, y, 1.3, 0.8) + L(left ? cx - 4.3 : cx + 4.3, y, left ? cx - 3.8 : cx + 3.8, y, 0.8) })
-  s += L(cx - nw / 2, nutY, cx + nw / 2, nutY, 1.4)
-  // braço, trastes e marcações
-  s += R(cx - nw / 2, nutY, nw, neckL + 4, 0.8)
-  range(bass ? 20 : 21).forEach(i => { s += L(cx - nw / 2, nutY + 2.4 + i * 2.35, cx + nw / 2, nutY + 2.4 + i * 2.35, 0.25) })
-  ;[3, 5, 7, 9].forEach(f => { s += C(cx, nutY + 2.4 + (f - 0.5) * 2.35, 0.55, 0.5) })
-  // corpo (contorno com chifres)
-  const y0 = bodyTop, k = bodyL / 46
-  const half2 = (sg: number) => `C${cx + sg * 6} ${y0 + 3} ${cx + sg * 8} ${y0 - 7} ${cx + sg * 12} ${y0 - 6}C${cx + sg * 16} ${y0 - 5} ${cx + sg * 16} ${y0 + 6} ${cx + sg * 14} ${y0 + 13}C${cx + sg * 12} ${y0 + 18} ${cx + sg * 17} ${y0 + 22 * k} ${cx + sg * 17} ${y0 + 32 * k}C${cx + sg * 17} ${y0 + 44 * k} ${cx + sg * 10} ${y0 + bodyL} ${cx} ${y0 + bodyL}`
-  const back = (sg: number) => `C${cx + sg * 10} ${y0 + bodyL} ${cx + sg * 17} ${y0 + 44 * k} ${cx + sg * 17} ${y0 + 32 * k}C${cx + sg * 17} ${y0 + 22 * k} ${cx + sg * 12} ${y0 + 18} ${cx + sg * 14} ${y0 + 13}C${cx + sg * 16} ${y0 + 6} ${cx + sg * 16} ${y0 - 5} ${cx + sg * 12} ${y0 - 6}C${cx + sg * 8} ${y0 - 7} ${cx + sg * 6} ${y0 + 3} ${cx + sg * 3} ${y0 + 3}`
-  s += sk(`M${cx - 3} ${y0 + 3}` + half2(-1) + back(1) + 'Z', 1)
-  // cordas
-  const sp = (nw - 1.2) / Math.max(1, strings - 1), bsp = (bass ? 6.6 : 5.6) / Math.max(1, strings - 1)
-  range(strings).forEach(i => { s += L(cx - (nw - 1.2) / 2 + i * sp, nutY, cx - (bass ? 3.3 : 2.8) + i * bsp, bridgeY, 0.25) })
-  // captadores, ponte, controles, plugue
-  const pk = bass ? [bridgeY - 24, bridgeY - 13] : [bridgeY - 25, bridgeY - 17, bridgeY - 9]
-  pk.forEach(y => { s += R(cx - (bass ? 6.5 : 7), y, bass ? 13 : 14, 3.4, 1, 0.8) })
-  s += R(cx - (bass ? 6.5 : 5.5), bridgeY, bass ? 13 : 11, 3, 0.8, 0.9) + range(strings).map(i => C(cx - (bass ? 3.3 : 2.8) + i * bsp, bridgeY + 1.5, 0.35, 0.4)).join('')
-  s += C(cx + 10, bridgeY - 4, 1.6, 0.8) + C(cx + 10, bridgeY + 3, 1.6, 0.8) + C(cx - 10, bridgeY + 3, 1.4, 0.7, '$A') + R(cx + 6, bridgeY + 8, 3.4, 2.2, 0.8, 0.7)
+  const wAt = (y: number) => wNut + ((wEnd - wNut) * (y - nutY)) / (endY - nutY)
+  s += sk(`M${f2(cx - wNut / 2)} ${nutY}L${f2(cx - wEnd / 2)} ${endY}M${f2(cx + wNut / 2)} ${nutY}L${f2(cx + wEnd / 2)} ${endY}`, 1)
+  s += L(cx - wNut / 2 - 0.15, nutY, cx + wNut / 2 + 0.15, nutY, 1.5)
+  for (let n = 1; n <= nFrets; n++) {
+    const y = nutY + scale * (1 - Math.pow(2, -n / 12)), w = wAt(y)
+    if (y < endY) s += L(cx - w / 2, y, cx + w / 2, y, 0.25)
+  }
+  for (const n of marks) {
+    const y = nutY + scale * (1 - Math.pow(2, -(n - 0.5) / 12))
+    if (n === 12) s += C(cx - 0.9, y, 0.45, 0.5) + C(cx + 0.9, y, 0.45, 0.5)
+    else s += C(cx, y, 0.5, 0.5)
+  }
+  return s
+}
+
+function stringLines(cx: number, nutY: number, bridgeY: number, n: number, wNut: number, wBridge: number) {
+  return range(n).map(i => { const t = n > 1 ? i / (n - 1) - 0.5 : 0; return L(cx + t * wNut * 0.8, nutY, cx + t * wBridge, bridgeY, 0.25) }).join('')
+}
+
+function stratocaster(): Glyph {
+  const cx = 17.5, W = 35, H = 100
+  let s = ''
+  // cabeça: seis tarraxas alinhadas no lado grave
+  s += sk(outline(cx, [-2.1, 17], [[[-2.2, 14], [-3.9, 12], [-4, 8.5]], [[-4.1, 4.5], [-3.6, 1.8], [-1, 0.9]], [[1.6, 0.1], [3.9, 1.2], [4, 3.6]], [[4.1, 6.6], [2.2, 8.6], [2.1, 12]], [[2.1, 14], [2.1, 15.5], [2.1, 17]]]), 1)
+  range(6).forEach(i => { const y = 2.6 + i * 2.15; s += C(cx - 5.7, y, 0.95, 0.8) + L(cx - 4.7, y, cx - 3.9, y, 0.8) })
+  // braço
+  s += neckFrets(cx, 17, 64.8, 21, 4.3, 5.7, 62, [3, 5, 7, 9, 12, 15, 17, 19])
+  // corpo (chifre grave maior à esquerda, chifre agudo menor à direita)
+  s += sk(outline(cx, [-3, 62], [
+    [[-4.6, 60.6], [-7.4, 58.4], [-7.9, 53]],              // interno do chifre grave
+    [[-8.2, 49], [-8.6, 46.4], [-9.8, 44.8]],
+    [[-10.8, 43.4], [-13, 43.8], [-13.9, 46.4]],           // ponta do chifre grave
+    [[-14.9, 49.6], [-15.7, 56], [-15.3, 61]],             // contorno superior
+    [[-14.9, 65.2], [-13.2, 68.6], [-12.8, 72]],           // cintura
+    [[-12.5, 75.6], [-15.7, 78.6], [-16.5, 83]],
+    [[-17.3, 88], [-16.7, 92.6], [-14.9, 95.8]],
+    [[-12.6, 99], [-6.6, 100], [0, 100]],                  // base
+    [[6.6, 100], [12.6, 99], [14.9, 95.8]],
+    [[16.7, 92.6], [17.3, 88], [16.5, 83]],
+    [[15.7, 78.6], [12.5, 75.6], [12.7, 72]],
+    [[12.9, 68.5], [14.6, 65.5], [14.9, 61]],
+    [[15.2, 56.6], [14.7, 52.6], [13.5, 50]],              // chifre agudo (mais curto)
+    [[12.2, 47.6], [9.2, 48.4], [8.2, 52]],
+    [[7.6, 55.8], [6, 59.8], [3, 62]],
+  ]), 1)
+  // escudo (pickguard)
+  s += sk(outline(cx, [-3.8, 63], [
+    [[-5.4, 62], [-8, 61.2], [-9.6, 63.6]], [[-11.4, 66.6], [-9.8, 71], [-10.8, 74.5]], [[-12.4, 79], [-12.8, 86], [-10.5, 90]],
+    [[-8, 93.4], [-3, 93], [0, 90.6]], [[3, 93.2], [8.4, 92.4], [11, 88.4]], [[13, 84], [12.6, 78], [11, 73.4]], [[9.4, 68.4], [10.8, 64.6], [8, 62.6]],
+    [[6, 61.4], [4.6, 62.6], [3.8, 63]],
+  ]), 0.55)
+  // cordas, captadores (3 single-coils), ponte tremolo
+  s += stringLines(cx, 17, 88.5, 6, 3.6, 5.2)
+  ;[69.6, 76.6, 83.6].forEach((y, i) => { s += R(cx - 6.6, y, 13.2, 2.7, 1.1, 0.8) + range(6).map(k => C(cx - 4.4 + k * 1.76, y + 1.35, 0.42, 0.4)).join(''); void i })
+  s += R(cx - 5.4, 86.2, 10.8, 6.6, 0.9, 0.9) + range(6).map(k => C(cx - 4.4 + k * 1.76, 88.5, 0.45, 0.4)).join('')
+  // chave seletora e 3 controles (volume + 2 tons, em arco)
+  s += R(cx + 9.8, 78.6, 1.6, 4.6, 0.5, 0.7)
+  s += C(cx + 7.8, 95.2, 1.5, 0.8, '$A') + C(cx + 10.5, 91.4, 1.5, 0.8) + C(cx + 12.2, 87.2, 1.5, 0.8)
+  return { w: W, h: H, d: s }
+}
+
+function jazzbass(): Glyph {
+  const cx = 17.5, W = 35, H = 118
+  let s = ''
+  // cabeça: quatro tarraxas alinhadas
+  s += sk(outline(cx, [-2.0, 22], [[[-2.1, 18], [-3.5, 15.5], [-3.6, 11]], [[-3.7, 6], [-3.2, 2], [-0.6, 1]], [[1.8, 0.2], [3.6, 1.6], [3.5, 4.6]], [[3.4, 8.2], [2.1, 10.5], [2.0, 15]], [[2.0, 18], [2.0, 20], [2.0, 22]]]), 1)
+  range(4).forEach(i => { const y = 3.6 + i * 3.6; s += C(cx - 5.4, y, 1.1, 0.8) + L(cx - 4.3, y, cx - 3.6, y, 0.8) })
+  // braço (escala 86,4 cm, 20 trastes)
+  s += neckFrets(cx, 22, 86.4, 20, 3.8, 6.4, 80, [3, 5, 7, 9, 12, 15, 17, 19])
+  // corpo: cintura deslocada, chifre grave longo, corte agudo curvo
+  s += sk(outline(cx, [-3.3, 76], [
+    [[-5, 75], [-7.2, 72], [-7.8, 66.5]],
+    [[-8.2, 62.6], [-12.2, 61.6], [-13.6, 65.4]],         // chifre grave longo
+    [[-14.6, 69], [-15, 74.5], [-14.4, 79]],
+    [[-13.8, 83.4], [-12.4, 86.4], [-12.6, 90]],          // cintura deslocada
+    [[-12.8, 94], [-16.6, 98], [-16.8, 104]],
+    [[-17, 111], [-10, 117.6], [0, 117.6]],
+    [[10, 117.6], [17, 111], [16.8, 104]],
+    [[16.6, 98], [13.2, 94], [13, 90]],
+    [[12.8, 86.6], [14.2, 83.2], [14.6, 79]],
+    [[15, 75], [14.8, 71], [13.2, 68.4]],                 // corte agudo
+    [[11.8, 66], [8.6, 68], [7.4, 70.6]],
+    [[6.2, 73], [5, 75.2], [3.3, 76]],
+  ]), 1)
+  // cordas, captadores, ponte
+  s += stringLines(cx, 22, 109.5, 4, 3.0, 7.4)
+  ;[90.6, 99.2].forEach(y => { s += R(cx - 6.9, y, 13.8, 3.2, 1.2, 0.8) + range(4).map(k => C(cx - 3.9 + k * 2.6, y + 1.6, 0.5, 0.4)).join('') })
+  s += R(cx - 5.6, 107.4, 11.2, 4.4, 0.9, 0.9) + range(4).map(k => C(cx - 3.9 + k * 2.6, 109.5, 0.5, 0.4)).join('')
+  // controles: dois volumes, tom e tomada
+  s += C(cx + 10.6, 103.2, 1.6, 0.8, '$A') + C(cx + 10.6, 108.4, 1.6, 0.8) + C(cx + 8.4, 113.4, 1.5, 0.8)
+  s += R(cx - 11.8, 106.6, 3.6, 2.4, 0.6, 0.7)
   return { w: W, h: H, d: s }
 }
 
@@ -160,6 +232,6 @@ export const DYN: Record<string, (P: Params) => Glyph> = {
   guitar_amp: P => cabinet(N(P, 'speakers', 2), N(P, 'size', 12), B(P, 'head'), false),
   bass_amp: P => cabinet(N(P, 'speakers', 4), N(P, 'size', 10), B(P, 'head'), true),
   drums, perc, keys, wedge,
-  eguitar: P => electric(false, N(P, 'strings', 6)),
-  ebass: P => electric(true, N(P, 'strings', 4)),
+  eguitar: () => stratocaster(),
+  ebass: () => jazzbass(),
 }
