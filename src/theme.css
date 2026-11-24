@@ -101,6 +101,7 @@ button:focus-visible, .card:focus-visible, .btn:focus-within { outline-color: va
   font-family: -apple-system, BlinkMacSystemFont, 'SF Pro Text', 'Segoe UI Variable', 'Segoe UI', Inter, system-ui, sans-serif;
 }
 [data-skin='apple'] body { font-size: 13px; letter-spacing: -.003em }
+[data-skin='apple'] svg, [data-skin='apple'] svg text { letter-spacing: normal }
 [data-skin='apple'] button { border-radius: 8px; border-color: var(--line); box-shadow: 0 1px 0 #0000000d }
 [data-skin='apple'] button:hover:not(:disabled) { border-color: var(--line2); background: var(--hover) }
 [data-skin='apple'] button.primary { background: var(--amber); border-color: var(--amber); color: #fff; box-shadow: none }
