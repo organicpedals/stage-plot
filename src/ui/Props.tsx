@@ -45,7 +45,6 @@ function MultiProps({ p, sel }: { p: Project; sel: Item[] }) {
     <aside className="props">
       <div className="panel-title">Design</div>
       <h4>{sel.length} {pt ? 'itens selecionados' : 'items selected'}{def ? ` · ${def.label[p.lang]}` : ''}</h4>
-      <p className="muted">{pt ? 'As alterações valem para todos os itens selecionados.' : 'Changes apply to all selected items.'}</p>
       {players.length > 0 && (
         <label>{pt ? `Músico (${players.length} ${players.length > 1 ? 'itens' : 'item'})` : `Player (${players.length})`}
           <MusicianInput p={p} value={same(players.map(i => i.who)) ? players[0].who : ''} placeholder={same(players.map(i => i.who)) ? (pt ? 'Escolha ou digite' : 'Pick or type') : mixed}
@@ -54,13 +53,11 @@ function MultiProps({ p, sel }: { p: Project; sel: Item[] }) {
       {lights.length > 0 && <label>DMX<input value={same(lights.map(i => i.dmx)) ? lights[0].dmx : ''} placeholder={same(lights.map(i => i.dmx)) ? '1.001' : mixed} onChange={e => update(pr => { for (const x of pr.items) if (lights.some(i => i.id === x.id)) x.dmx = e.target.value }, false)} /></label>}
       {params.length > 0 && <div className="parbox">
         {params.map(({ d, vals }) => <ParamField key={d.key} d={d} value={vals[0]} lang={p.lang} onChange={v => each(x => { x.params = { ...x.params, [d.key]: v } })} />)}
-        {params.some(x => !same(x.vals)) && <small className="muted">{pt ? 'Parâmetros com valores diferentes mostram o do primeiro item.' : 'Differing parameters show the first item’s value.'}</small>}
       </div>}
       <div className="field">{pt ? 'Rotação (°)' : 'Rotation (°)'}
         <span className="slide"><input type="range" min={-180} max={180} step={5} value={rots[0]} onChange={e => each(x => { x.rot = +e.target.value })} /><NumInput min={-360} max={360} step={5} value={rots[0]} onChange={v => each(x => { x.rot = v })} /></span></div>
       <div className="field">{pt ? 'Tamanho (×)' : 'Size (×)'}
         <span className="slide"><input type="range" min={0.4} max={3} step={0.1} value={Math.min(3, Math.max(0.4, scales[0]))} onChange={e => each(x => { x.scale = +e.target.value })} /><NumInput min={0.1} max={10} step={0.1} value={scales[0]} onChange={v => each(x => { x.scale = v })} /></span></div>
-      {(!same(rots) || !same(scales)) && <small className="muted">{pt ? 'Rotação/tamanho mostram o do primeiro item; ao alterar, todos recebem o mesmo valor.' : 'Rotation/size show the first item’s value; changing sets all to it.'}</small>}
       <label className="chk"><input type="checkbox" checked={sel.every(i => !i.hidden)} onChange={e => each(x => { x.hidden = !e.target.checked }, true)} /> {pt ? 'Visível no mapa' : 'Visible on map'}</label>
       <label className="chk"><input type="checkbox" checked={sel.every(i => i.locked)} onChange={e => each(x => { x.locked = e.target.checked }, true)} /> {pt ? 'Travar posição' : 'Lock position'}</label>
       <button className="danger" onClick={() => { update(pr => { pr.items = pr.items.filter(i => !ids.includes(i.id)) }); select([]) }}>{pt ? `Remover ${sel.length} itens` : `Remove ${sel.length} items`}</button>
@@ -82,7 +79,7 @@ export function Props({ p }: { p: Project }) {
   return (
     <aside className="props">
       <div className="panel-title">Design</div>
-      {!it || !def ? <p className="muted">{pt ? 'Selecione um item no mapa para editar os parâmetros do equipamento. Atalhos: Del apagar · Ctrl+D duplicar · setas mover · Ctrl+Z desfazer.' : 'Select an item to edit its parameters. Shortcuts: Del delete · Ctrl+D duplicate · arrows move · Ctrl+Z undo.'}</p> : (<>
+      {!it || !def ? null : (<>
         <h4>{def.label[p.lang]}</h4>
         <label>{pt ? 'Rótulo / nome' : 'Label / name'}<input value={it.label} onChange={e => set({ label: e.target.value })} /></label>
         {def.params.length > 0 && <div className="parbox">

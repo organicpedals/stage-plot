@@ -52,7 +52,7 @@ function Home() {
   }
   return (
     <div className="home">
-      <header className="brand"><span className="logo" />Stage Plot<small>mapas de palco · luz · rider técnico</small><span className="sp" /><SkinSelect lang="pt" /><ThemeToggle lang="pt" /><IconStyleSelect lang="pt" /></header>
+      <header className="brand"><span className="logo" />Stage Plot<span className="sp" /><SkinSelect lang="pt" /><ThemeToggle lang="pt" /><IconStyleSelect lang="pt" /></header>
       <div className="grid">
         <button className="card new" onClick={() => addProject(newProject('Nova banda'))}><b>+</b> Novo projeto</button>
         <label className="card new"><b>↥</b> Importar projetos (.json)<input type="file" accept=".json,application/json" multiple hidden onChange={fileIn} /></label>

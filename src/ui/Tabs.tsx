@@ -67,7 +67,6 @@ export function InputsTab({ p }: { p: Project }) {
   return (
     <div className="doc wide">
       <h2>Input list</h2>
-      <p className="muted">{pt ? 'Gerada a partir dos equipamentos do palco (mude os parâmetros do equipamento e os canais se ajustam). Todas as células são editáveis.' : 'Generated from the stage equipment (change item parameters and channels follow). Every cell is editable.'}</p>
       <div className="scroll-x"><table className="edit"><thead><tr>
         <th>CH</th><th>{pt ? 'Canal' : 'Channel'}</th><th>{pt ? 'Fonte' : 'Source'}</th><th>Mic / DI</th><th>{pt ? 'Suporte' : 'Stand'}</th><th>{pt ? 'Músico' : 'Player'}</th><th>{pt ? 'Obs.' : 'Notes'}</th><th></th>
       </tr></thead>
@@ -83,7 +82,6 @@ export function InputsTab({ p }: { p: Project }) {
             </td>
           </tr>))}
         </tbody></table></div>
-      {!rows.length && <p className="muted">{pt ? 'Nenhum canal ainda. Adicione instrumentos ao mapa de palco ou crie um canal manual.' : 'No channels yet.'}</p>}
       <div className="actions">
         <button onClick={addManual}>+ {pt ? 'Canal manual' : 'Manual channel'}</button>
         {p.chan.hidden.length > 0 && <button className="ghost" onClick={() => update(pr => { pr.chan.hidden = [] })}>{pt ? `Restaurar ${p.chan.hidden.length} removido(s)` : `Restore ${p.chan.hidden.length} removed`}</button>}
@@ -96,10 +94,8 @@ export function InputsTab({ p }: { p: Project }) {
           <td><input className="cell num" type="number" min={0} max={16} value={o.mix} onChange={e => item(o.itemId, it => { it.params = { ...it.params, mix: +e.target.value } })} /></td>
           <td><input className="cell" value={p.items.find(i => i.id === o.itemId)?.label ?? ''} placeholder={o.name} onChange={e => item(o.itemId, it => { it.label = e.target.value })} /></td><td>{o.type}</td>
           <td><MusicianInput p={p} className="cell" value={o.who} onChange={v => item(o.itemId, it => { it.who = v })} /></td></tr>)}</tbody></table>
-      {!outs.length && <p className="muted">{pt ? 'Adicione retornos, side fills ou IEMs ao mapa.' : 'Add wedges, side fills or IEMs to the plot.'}</p>}
 
       <h2>{pt ? 'Pontos de energia' : 'Power points'}</h2>
-      <p className="muted">{pt ? 'Vêm do mapa de palco (Ponto AC, régua, ponto de energia): quantidade de tomadas e músico.' : 'Taken from the stage plot (AC outlet, power strip, power drop): outlet count and player.'}</p>
       <table className="edit"><thead><tr><th>#</th><th>{pt ? 'Ponto' : 'Point'}</th><th>{pt ? 'Músico' : 'Player'}</th><th>{pt ? 'Tomadas' : 'Outlets'}</th><th>{pt ? 'Tensão' : 'Voltage'}</th></tr></thead>
         <tbody onKeyDown={tabDown}>{power.map(r => <tr key={r.itemId}><td className="mono">{r.n}</td>
           <td><input className="cell" value={p.items.find(i => i.id === r.itemId)?.label ?? ''} placeholder={r.name} onChange={e => item(r.itemId, it => { it.label = e.target.value })} /></td>
@@ -128,7 +124,6 @@ export function RiderTab({ p }: { p: Project }) {
   return (
     <div className="doc">
       <h2>{pt ? 'Rider técnico' : 'Technical rider'}</h2>
-      <p className="muted">{pt ? 'Seções de texto que entram no PDF.' : 'Text sections included in the PDF.'}</p>
       {p.sections.map((s, i) => (
         <div key={s.id} className="sec">
           <div className="sec-head">
@@ -154,7 +149,6 @@ export function InfoTab({ p }: { p: Project }) {
   return (
     <div className="doc">
       <h2>{pt ? 'Informações' : 'Info'}</h2>
-      <p className="muted">{pt ? 'Aparecem só na capa do PDF: foto, rider técnico, nome da banda, ano de vigência e os dois contatos.' : 'Shown only on the PDF cover: photo, technical rider, band name, valid-for year and the two contacts.'}</p>
       <h3>{pt ? 'Banda' : 'Band'}</h3>
       <div className="form2">
         {f('name', pt ? 'Nome da banda' : 'Band name')}
@@ -166,14 +160,12 @@ export function InfoTab({ p }: { p: Project }) {
         {['#6F6620', '#C2410C', '#B91C1C', '#0F766E', '#1D4ED8', '#7E22CE', '#BE185D'].map(c => <button key={c} type="button" className="swatch" title={c} style={{ background: c, outline: (p.pdfAccent ?? '').toUpperCase() === c ? '2px solid var(--fg)' : 'none' }} onClick={() => update(pr => { pr.pdfAccent = c })} />)}
         {p.pdfAccent && <button className="ghost" onClick={() => update(pr => { delete pr.pdfAccent })}>{pt ? 'Padrão do modelo' : 'Model default'}</button>}
       </div>
-      <p className="muted">{pt ? 'Usada em números, títulos, réguas e contatos. O app ajusta o tom para manter a leitura sobre fundo claro e escuro.' : 'Used for numbers, headings, rules and contacts. The tone is adjusted to stay readable on light and dark backgrounds.'}</p>
       <h3>{pt ? 'Foto da capa' : 'Cover photo'}</h3>
       <div className="photo">
         {p.press.photo ? <img src={p.press.photo} alt="" /> : <div className="ph">{pt ? 'Foto da capa' : 'Cover photo'}</div>}
         <div>
           <label className="btn">{p.press.photo ? (pt ? 'Trocar foto' : 'Change photo') : (pt ? 'Escolher foto' : 'Choose photo')}<input type="file" accept="image/*" hidden onChange={pick(d => update(pr => { pr.press.photo = d }))} /></label>
           {p.press.photo && <button className="ghost" onClick={() => update(pr => { pr.press.photo = '' })}>{pt ? 'Remover' : 'Remove'}</button>}
-          <p className="muted">{pt ? 'Foto vertical ou quadrada de boa resolução: ocupa a capa inteira.' : 'A high-resolution portrait or square photo: it fills the whole cover.'}</p>
         </div>
       </div>
       <h3>{pt ? 'Coordenador técnico' : 'Technical coordinator'}</h3>
@@ -181,7 +173,6 @@ export function InfoTab({ p }: { p: Project }) {
       <h3>{pt ? 'Produtor' : 'Producer'}</h3>
       <div className="form2">{f('mgmtName', pt ? 'Nome' : 'Name')}{f('mgmtPhone', pt ? 'Telefone' : 'Phone', 'tel')}{f('mgmtEmail', 'E-mail', 'email')}</div>
       <h3>{pt ? 'Integrantes' : 'Members'}</h3>
-      <p className="muted">{pt ? 'Alimentam o campo Músico da input list.' : 'They feed the Player field of the input list.'}</p>
       {p.members.map((m, i) => (
         <div key={m.id} className="row2">
           <input placeholder={pt ? 'Nome' : 'Name'} value={m.name} onChange={e => update(pr => { const old = pr.members[i].name, nv = e.target.value; pr.members[i].name = nv; if (old) for (const it of pr.items) if (it.who === old) it.who = nv }, false)} />

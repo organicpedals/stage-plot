@@ -30,14 +30,12 @@ export function ExportTab({ p }: { p: Project }) {
     <div className="export">
       <section className="tpls">
         <h2>{pt ? 'PDF' : 'PDF'}</h2>
-        <p className="tpl-note">{pt ? 'Um único PDF, sempre nesta ordem: capa (foto, Rider técnico, nome da banda, ano de vigência e contatos, tudo da aba Informações), rider a partir da página 2, mapa de palco, input list e mapa de luz. Mapas e input list ocupam uma página cada; mapa de luz vazio fica de fora.' : 'One PDF, always in this order: cover (photo, Technical rider, band name, valid-for year and contacts, all from the Info tab), rider from page 2, stage plot, input list and light plot. Plots and input list take one page each; an empty light plot is left out.'}</p>
         <div className="pdfstyles" role="radiogroup" aria-label={pt ? 'Modelo do PDF' : 'PDF model'}>
           {STYLE_IDS.map(id => (
             <label key={id} className={'pdfstyle' + (styleOf(p).id === id ? ' on' : '')}>
               <input type="radio" name="pdfstyle" checked={styleOf(p).id === id} onChange={() => update(pr => { pr.pdfStyle = id })} />
               <span className={'thumb t-' + id} aria-hidden="true"><i /><i /><i /></span>
               <b>{STYLES[id].label[p.lang]}</b>
-              <small>{STYLES[id].desc[p.lang]}</small>
             </label>
           ))}
         </div>
@@ -46,7 +44,6 @@ export function ExportTab({ p }: { p: Project }) {
         </div>
         <label className="chk block"><input type="checkbox" checked={!!p.pdfMono} onChange={e => update(pr => { pr.pdfMono = e.target.checked })} />
           {pt ? 'Versão P&B / alto contraste (impressão)' : 'B/W high-contrast version (print)'}</label>
-        <p className="tpl-note">{pt ? <>Todo PDF traz a frase "substitui versões anteriores". Foto, ano de vigência e contatos vêm da aba Informações.</> : <>Every PDF carries the "supersedes previous versions" line. Photo, valid-for year and contacts come from the Info tab.</>}</p>
         {gaps.length > 0 && (
           <div className="gaps" role="status">
             <b>{pt ? 'Não aparecerá no PDF (sem dados)' : 'Left out of the PDF (no data)'}</b>

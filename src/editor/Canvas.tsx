@@ -190,7 +190,6 @@ export function Canvas({ p, board }: { p: Project; board: Board }) {
         </span>
         {board === 'light' && <span className="hint">{(['aereo', 'chao'] as const).map(k => <span key={k} style={{ marginRight: 10 }}><i style={{ display: 'inline-block', width: 9, height: 9, borderRadius: 5, background: MOUNT[k].color, marginRight: 4 }} />{pt ? MOUNT[k].pt : MOUNT[k].en}</span>)}</span>}
         <span className="sp" />
-        <span className="hint">{pt ? 'Espaço = mão · Alt+arrastar = duplicar · Shift = multi-seleção · Ctrl+C/V' : 'Space = pan · Alt+drag = duplicate · Shift = multi-select · Ctrl+C/V'}</span>
         <button onClick={() => zoomBy(0.8)}>−</button>
         <button className="mono zbtn" onClick={() => zoomTo(100)} title="Ctrl+1">{Math.round(z)}%</button>
         <button onClick={() => zoomBy(1.25)}>+</button>
