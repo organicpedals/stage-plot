@@ -1,6 +1,7 @@
 import { create } from 'zustand'
 import type { Board, Item, Lang } from '../model/types'
 import { PACKS, packSvg } from './packs'
+import { DYN } from './packs-dyn'
 
 /* Estilo "contorno suave", minimalista: vista de cima, poucas peças que aludem ao objeto,
    preenchimento translúcido e um ponto de destaque (ciano no áudio, âmbar na luz).
@@ -50,12 +51,13 @@ const drum = (x: number, y: number, r: number, o = 0.1) => ci(x, y, r, o) + ring
 const spk = (x: number, y: number, r: number) => ci(x, y, r, 0.08) + ring(x, y, r * 0.5) + dotA(x, y, Math.max(1.8, r * 0.18))
 
 // ---------- estilo global dos ícones ----------
-export type IconStyle = 'S' | 'P' | 'F' | 'R'
+export type IconStyle = 'S' | 'P' | 'F' | 'R' | 'D'
 export const ICON_STYLES: { id: IconStyle; label: { pt: string; en: string } }[] = [
   { id: 'S', label: { pt: 'Planta detalhada', en: 'Detailed plan' } },
   { id: 'P', label: { pt: 'Apple · SF Symbols', en: 'Apple · SF Symbols' } },
   { id: 'F', label: { pt: 'Figma · Vetor', en: 'Figma · Vector' } },
   { id: 'R', label: { pt: 'Realista · Silhueta', en: 'Realistic · Silhouette' } },
+  { id: 'D', label: { pt: 'Semi-realista · Contorno (muda com a config.)', en: 'Semi-realistic · Outline (follows config)' } },
 ]
 const STYLE_KEY = 'stageplot.iconstyle'
 const loadStyle = (): IconStyle => {
@@ -83,7 +85,7 @@ export function paint(svg: string, ink: string, accent: string, sw: number, styl
       .replace(/fill="\$I" fill-opacity="([\d.]+)"/g, (_m, o) => `fill="$I" fill-opacity="${Math.min(0.24, Number(o) * 1.6 + 0.04).toFixed(2)}"`)
       .replace(/(?<!-)opacity="0?\.[67]"/g, 'opacity="1"')
       .replace(/rx="([\d.]+)"/g, (_m, r) => `rx="${(Number(r) * 1.7).toFixed(2)}"`)
-  } else if (style === 'R') {
+  } else if (style === 'R' || style === 'D') {
     wrap = 'stroke-linecap="round" stroke-linejoin="round"' // glifos realistas (packs-real.ts) já vêm prontos; itens sem glifo seguem a base
   } else if (style === 'F') {
     sw *= pk ? 1 : 0.8; wrap = 'stroke-linecap="butt" stroke-linejoin="miter"'
@@ -206,7 +208,7 @@ const piano: IconDef = {
 
 const guitarAmp: IconDef = {
   id: 'guitar_amp', cat: 'amp', board: 'stage', label: { pt: 'Ampli guitarra', en: 'Guitar amp' },
-  params: [sel('speakers', 'Alto-falantes', 'Speakers', '2', ['1', '2', '4']), sel('size', 'Tamanho (pol.)', 'Size (in)', '12', ['8', '10', '12']), bool('head', 'Cabeçote', 'Head', false), num('mics', 'Microfones', 'Mics', 1, 0, 2), bool('di', 'Saída DI', 'DI out', false)],
+  params: [sel('brand', 'Marca (visual)', 'Brand (look)', 'Fender', ['Fender', 'Marshall', 'Vox', 'Orange', 'Genérico']), sel('speakers', 'Alto-falantes', 'Speakers', '2', ['1', '2', '4']), sel('size', 'Tamanho (pol.)', 'Size (in)', '12', ['8', '10', '12']), bool('head', 'Cabeçote', 'Head', false), num('mics', 'Microfones', 'Mics', 1, 0, 2), bool('di', 'Saída DI', 'DI out', false)],
   build: () => ART.guitarAmp,
   spec: P => `${S(P, 'speakers')}×${S(P, 'size')}"${B(P, 'head') ? ' + head' : ''}`,
   channels: (P, base, t) => {
@@ -218,7 +220,7 @@ const guitarAmp: IconDef = {
 }
 const bassAmp: IconDef = {
   id: 'bass_amp', cat: 'amp', board: 'stage', label: { pt: 'Ampli baixo', en: 'Bass amp' },
-  params: [sel('speakers', 'Alto-falantes', 'Speakers', '4', ['1', '2', '4', '6', '8']), sel('size', 'Tamanho (pol.)', 'Size (in)', '10', ['10', '12', '15', '18']), bool('head', 'Cabeçote', 'Head', true), bool('di', 'Saída DI', 'DI out', true), bool('mic', 'Microfone no gabinete', 'Cab mic', false)],
+  params: [sel('brand', 'Marca (visual)', 'Brand (look)', 'Ampeg', ['Ampeg', 'Fender', 'Markbass', 'Genérico']), sel('speakers', 'Alto-falantes', 'Speakers', '4', ['1', '2', '4', '6', '8']), sel('size', 'Tamanho (pol.)', 'Size (in)', '10', ['10', '12', '15', '18']), bool('head', 'Cabeçote', 'Head', true), bool('di', 'Saída DI', 'DI out', true), bool('mic', 'Microfone no gabinete', 'Cab mic', false)],
   build: () => ART.bassAmp,
   spec: P => `${S(P, 'speakers')}×${S(P, 'size')}"${B(P, 'head') ? ' + head' : ''}`,
   channels: (P, base, t) => {
@@ -574,6 +576,7 @@ const withLegacy = (d: IconDef): IconDef => ({
       svg = `<g transform="scale(${s.toFixed(4)}) translate(${-bx} ${-by})" stroke-width="$W(${s.toFixed(4)})">${art}</g>`
     }
     const st = curStyle()
+    if (st === 'D') { const dy = DYN[d.id]; if (dy) { const g = dy(P); return { w: g.w, h: g.h, svg: packSvg(g, g.w, g.h) } } }
     if (st !== 'S') { const pk = PACKS[st][d.id]; if (pk) return { w, h, svg: packSvg(pk, w, h) } }
     return { w, h, svg }
   },

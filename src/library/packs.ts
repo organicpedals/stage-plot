@@ -190,7 +190,7 @@ export const FIGMA: Pack = {
   dmxsplit: G(48, 26, sr(1, 2, 46, 22, 2) + [0, 1, 2, 3].map(i => sc(9 + i * 10, 13, 3)).join('') + an(41, 13)),
 }
 
-export const PACKS: Record<'P' | 'F' | 'R', Pack> = { P: APPLE, F: FIGMA, R: REAL }
+export const PACKS: Record<'P' | 'F' | 'R' | 'D', Pack> = { P: APPLE, F: FIGMA, R: REAL, D: FIGMA }
 
 /** Posiciona o glifo (caixa de desenho própria) dentro da caixa w×h do item, preservando proporção. */
 export function packSvg(g: Glyph, w: number, h: number): string {
