@@ -148,8 +148,6 @@ const drums: IconDef = {
   id: 'drums', cat: 'inst', board: 'stage', label: { pt: 'Bateria', en: 'Drum kit' },
   params: [
     num('kick', 'Bumbos', 'Kick drums', 1, 1, 2), bool('kicksplit', 'Bumbo em 2 canais (in + out)', 'Split kick (in + out)', false), num('toms', 'Tons (rack)', 'Rack toms', 2, 0, 4), num('floors', 'Surdos (tom de chão)', 'Floor toms', 1, 0, 2),
-    bool('stool', 'Banco', 'Throne', false), bool('hhmachine', 'Máquina de chimbal', 'Hi-hat stand', false), bool('kickpedal', 'Pedal de bumbo', 'Kick pedal', false),
-    num('stands', 'Estantes (qtd.)', 'Cymbal stands (qty)', 0, 0, 12), sel('standtype', 'Tipo de estante', 'Stand type', 'Girafa', ['Reta', 'Girafa']),
   ],
   build: () => ART.drums,
   spec: (P, t) => `${N(P, 'kick')} ${t('bumbo', 'kick')} · ${N(P, 'toms')} ${t('tons', 'toms')} · ${N(P, 'floors')} ${t('surdo', 'floor')}`,
@@ -243,6 +241,22 @@ const acoustic: IconDef = {
   },
 }
 
+const eGuitar: IconDef = {
+  id: 'eguitar', cat: 'inst', board: 'stage', label: { pt: 'Guitarra elétrica', en: 'Electric guitar' },
+  params: [sel('strings', 'Cordas', 'Strings', '6', ['6', '7', '8']), bool('di', 'Linha direta (DI, sem ampli)', 'Direct line (DI, no amp)', false)],
+  build: () => mk(34, 76, rr(14, 1, 7, 12, 2, 0.12) + rr(15.5, 13, 4, 28, 1) + pa('M17.5 40 C27 36 31 42 28 48 C33 52 32 64 24 70 C20 73 15 73 11 70 C3 64 2 52 7 48 C4 42 8 36 17.5 40Z') + ln(11, 56, 24, 56) + ln(11, 61, 24, 61) + dotA(17.5, 66, 2)),
+  spec: P => `${S(P, 'strings')} ${'cordas'}`,
+  channels: (P, base, t) => (B(P, 'di') ? [{ name: base || t('Guitarra', 'Guitar'), mic: 'DI', stand: '-' }] : []),
+}
+
+const eBass: IconDef = {
+  id: 'ebass', cat: 'inst', board: 'stage', label: { pt: 'Baixo elétrico', en: 'Electric bass' },
+  params: [sel('strings', 'Cordas', 'Strings', '4', ['4', '5', '6']), bool('di', 'Linha direta (DI)', 'Direct line (DI)', true)],
+  build: () => mk(34, 92, rr(14.5, 1, 6, 14, 2, 0.12) + rr(15, 15, 5, 38, 1) + pa('M17.5 52 C27 48 31 54 28 60 C33 64 32 78 24 85 C20 88 15 88 11 85 C3 78 2 64 7 60 C4 54 8 48 17.5 52Z') + ln(11, 66, 24, 66) + ln(11, 72, 24, 72) + dotA(17.5, 79, 2)),
+  spec: P => `${S(P, 'strings')} ${'cordas'}`,
+  channels: (P, base, t) => (B(P, 'di') ? [{ name: base || t('Baixo', 'Bass'), mic: 'DI', stand: '-' }] : []),
+}
+
 const horn: IconDef = {
   id: 'horn', cat: 'inst', board: 'stage', label: { pt: 'Sopros', en: 'Horns' },
   params: [num('count', 'Sopristas', 'Players', 2, 1, 6), sel('type', 'Instrumento', 'Instrument', 'Sax', ['Sax', 'Trompete', 'Trombone', 'Flauta', 'Naipe misto'])],
@@ -297,9 +311,9 @@ const stool: IconDef = { id: 'stool', cat: 'misc', board: 'stage', label: { pt: 
 
 const monMix = [num('mix', 'Mix de retorno nº', 'Monitor mix no.', 1, 0, 16)]
 const mixSpec = (P: Params) => (N(P, 'mix') ? `Mix ${N(P, 'mix')}` : '')
-const wedge: IconDef = { id: 'wedge', cat: 'mon', board: 'stage', label: { pt: 'Spot (retorno)', en: 'Wedge monitor' }, params: [...monMix, sel('size', 'Tamanho', 'Size', '12', ['10', '12', '15'])], build: () => ART.wedge, spec: mixSpec }
-const sidefill: IconDef = { id: 'sidefill', cat: 'mon', board: 'stage', label: { pt: 'Side fill', en: 'Side fill' }, params: [...monMix, num('speakers', 'Alto-falantes', 'Speakers', 2, 1, 3)], build: () => ART.sidefill, spec: mixSpec }
-const iem: IconDef = { id: 'iem', cat: 'mon', board: 'stage', label: { pt: 'In-ear (IEM)', en: 'In-ear (IEM)' }, params: [...monMix, bool('stereo', 'Estéreo', 'Stereo', true)], build: () => ART.iem, spec: mixSpec }
+const wedge: IconDef = { id: 'wedge', cat: 'mon', board: 'stage', label: { pt: 'Spot (retorno)', en: 'Wedge monitor' }, params: [...monMix, sel('size', 'Tamanho (pol.)', 'Size (in)', '12', ['10', '12', '15'])], build: () => ART.wedge, spec: P => [mixSpec(P), `${S(P, 'size')}"`].filter(Boolean).join(' · ') }
+const sidefill: IconDef = { id: 'sidefill', cat: 'mon', board: 'stage', label: { pt: 'Side fill', en: 'Side fill' }, params: [...monMix, num('speakers', 'Alto-falantes', 'Speakers', 2, 1, 3)], build: () => ART.sidefill, spec: (P, t) => [mixSpec(P), `${N(P, 'speakers')} ${t('falantes', 'speakers')}`].filter(Boolean).join(' · ') }
+const iem: IconDef = { id: 'iem', cat: 'mon', board: 'stage', label: { pt: 'In-ear (IEM)', en: 'In-ear (IEM)' }, params: [...monMix], build: () => ART.iem, spec: mixSpec }
 const monDesk: IconDef = { id: 'mon_desk', cat: 'foh', board: 'stage', label: { pt: 'Mesa de monitor', en: 'Monitor desk' }, params: [num('chs', 'Canais', 'Channels', 32, 8, 64, 8)], build: () => faderDesk(110, 5), spec: P => `${N(P, 'chs')} ch` }
 const fohDesk: IconDef = { id: 'foh_desk', cat: 'foh', board: 'stage', label: { pt: 'Mesa FOH', en: 'FOH desk' }, params: [num('chs', 'Canais', 'Channels', 32, 8, 64, 8)], build: () => faderDesk(130, 7), spec: P => `${N(P, 'chs')} ch` }
 const rack: IconDef = { id: 'rack', cat: 'foh', board: 'stage', label: { pt: 'Rack', en: 'Rack' }, params: [num('u', 'Unidades (U)', 'Rack units (U)', 8, 2, 16, 2)], build: () => ART.rack, spec: P => `${N(P, 'u')} U` }
@@ -321,7 +335,8 @@ const parCan = (w: number, h: number) => mk(w, h, pl(`M${w * 0.08} ${h * 0.3} V$
 const lamp = (watt: number, w: number, h: number, art: Built | undefined = undefined) => ({ w, h, art, watt })
 void lamp
 const lt = (id: string, cat: IconDef['cat'], pt: string, en: string, watt: number, art: Built, extra: ParamDef[] = []): IconDef =>
-  ({ id, cat, board: 'light', label: { pt, en }, params: [...lightCommon(watt), ...extra], build: () => art, spec: lightSpec })
+  ({ id, cat, board: 'light', label: { pt, en }, params: [...lightCommon(watt), ...extra], build: () => art,
+  spec: P => [lightSpec(P), ...extra.map(e => (e.key === 'angle' ? `${S(P, e.key)}°` : S(P, e.key)))].filter(Boolean).join(' · ') })
 
 const par64 = lt('par64', 'fixture', 'Par 64', 'PAR 64', 1000, parCan(36, 44))
 const par56 = lt('par56', 'fixture', 'Par 56', 'PAR 56', 300, parCan(30, 38))
@@ -365,12 +380,12 @@ const outLabel = (P: Params, t: Tr) => (S(P, 'out') === 'Linha' ? t('Linha', 'Li
 const pedalboard: IconDef = { id: 'pedalboard', cat: 'inst', board: 'stage', label: { pt: 'Pedalboard', en: 'Pedalboard' },
   params: [num('pedals', 'Pedais', 'Pedals', 6, 1, 20), sel('out', 'Saída para', 'Output to', 'Amplificador', ['Linha', 'Amplificador'])],
   build: () => mk(64, 38, rr(0, 0, 64, 38, 4, 0.08) + pedalbox(4, 4, 14, 14) + pedalbox(21, 4, 14, 14) + pedalbox(38, 4, 14, 14) + pedalbox(8, 21, 16, 14) + pedalbox(28, 21, 16, 14) + dotA(58, 28, 2)),
-  spec: (P, t) => outLabel(P, t),
+  spec: (P, t) => [`${N(P, 'pedals')} ${t('pedais', 'pedals')}`, outLabel(P, t)].join(' · '),
   channels: (P, base) => (S(P, 'out') === 'Linha' ? [{ name: (base || 'Pedalboard') + ' DI', mic: 'DI', stand: '-' }] : []) }
 const multifx: IconDef = { id: 'multifx', cat: 'inst', board: 'stage', label: { pt: 'Pedaleira (multi-efeitos)', en: 'Multi-FX pedalboard' },
   params: [sel('model', 'Modelo', 'Model', 'Helix / Kemper / Fractal', ['Helix / Kemper / Fractal', 'Line 6', 'Boss GT', 'Zoom', 'Outro']), sel('out', 'Saída para', 'Output to', 'Linha', ['Linha', 'Amplificador']), stereoParam],
   build: () => mk(60, 32, rr(0, 0, 60, 32, 4, 0.12) + rr(24, 4, 20, 8, 1.5, 0.1) + sw(10, 9) + sw(17, 9) + sw(50, 9) + [8, 20, 32, 44, 56].map(x => dotA(x - 2, 24, 2)).join('')),
-  spec: (P, t) => outLabel(P, t),
+  spec: (P, t) => [S(P, 'model'), outLabel(P, t)].join(' · '),
   channels: (P, base, t) => (S(P, 'out') === 'Amplificador' ? [] : lrCh(P, base || t('Pedaleira', 'Multi-FX'))) }
 const edrums: IconDef = { id: 'edrums', cat: 'inst', board: 'stage', label: { pt: 'Bateria eletrônica', en: 'Electronic drums' },
   params: [stereoParam, bool('click', 'Canal de click', 'Click channel', false)],
@@ -441,7 +456,7 @@ const rug: IconDef = { id: 'rug', cat: 'misc', board: 'stage', label: { pt: 'Tap
 const screenItem: IconDef = { id: 'screen', cat: 'misc', board: 'stage', label: { pt: 'Telão / LED', en: 'Screen / LED wall' }, params: [num('wm', 'Largura (m)', 'Width (m)', 4, 1, 20, 0.5), text('model', 'Modelo', 'Model', '')],
   build: P => { const w = N(P, 'wm') * 100; return mk(w, 14, rr(0, 0, w, 14, 2, 0.12) + dotA(w - 6, 7, 2)) }, spec: P => `${N(P, 'wm')} m${S(P, 'model') ? ' · ' + S(P, 'model') : ''}` }
 const teleprompter: IconDef = { id: 'teleprompter', cat: 'misc', board: 'stage', label: { pt: 'Tele Prompter', en: 'Teleprompter' },
-  params: [sel('size', 'Tela (pol.)', 'Screen (in)', '17"', ['15"', '17"', '19"', '22"']), bool('mirror', 'Espelho (vidro)', 'Mirror glass', true)],
+  params: [sel('size', 'Tela (pol.)', 'Screen (in)', '17"', ['15"', '17"', '19"', '22"'])],
   build: () => mk(46, 36, rr(2, 0, 42, 24, 3, 0.1) + ln(8, 8, 38, 8) + ln(8, 14, 32, 14) + pa('M23 24 L11 34 H35 Z', 0.08) + dotA(41, 20, 1.8)),
   spec: P => S(P, 'size') }
 const backdrop: IconDef = { id: 'backdrop', cat: 'misc', board: 'stage', label: { pt: 'Backdrop / Banner', en: 'Backdrop / Banner' }, params: [num('wm', 'Largura (m)', 'Width (m)', 3, 0.5, 20, 0.5)],
@@ -583,7 +598,7 @@ const withLegacy = (d: IconDef): IconDef => ({
 })
 
 export const ICONS: IconDef[] = [
-  drums, edrums, perc, pads, keys, organ, piano, accordion, guitarAmp, bassAmp, ampAc, multifx, pedalboard, acoustic, horn, strings, dj, laptop, vocal, backing, choir, talkback, stool, chair, musicStand, stand, fan, rug,
+  drums, edrums, perc, pads, keys, organ, piano, accordion, guitarAmp, bassAmp, ampAc, multifx, pedalboard, acoustic, eGuitar, eBass, horn, strings, dj, laptop, vocal, backing, choir, talkback, stool, chair, musicStand, stand, fan, rug,
   wedge, sidefill, iem, pmix, monDesk, fohDesk, rack, wireless, snake, di,
   paMain, subw, fohTower,
   ac, strip, power, breaker, gen, net,

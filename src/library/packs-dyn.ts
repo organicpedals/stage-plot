@@ -110,8 +110,56 @@ function keys(P: Params): Glyph {
   return { w: W + 2, h: units * gap + 0, d: place(1, 1, range(units).map(u => place(0, u * gap, one)).join('')) }
 }
 
+// ---------- guitarra / baixo elétricos (vista frontal, braço para cima) ----------
+function electric(bass: boolean, strings: number): Glyph {
+  const cx = 17.5, W = 35
+  const hs = bass ? 22 : 18, nutY = hs, neckL = bass ? 56 : 42, bodyTop = nutY + neckL - 6, bodyL = bass ? 52 : 46, H = bodyTop + bodyL + 2
+  const nw = bass ? 6 : 4.8, bridgeY = bodyTop + bodyL - (bass ? 17 : 15)
+  let s = ''
+  // cabeça com tarraxas
+  s += R(cx - 3.8, 0, 7.6, hs, 3.2)
+  const half = Math.ceil(strings / 2)
+  range(strings).forEach(i => { const left = i < half, k = left ? i : i - half, y = 3.4 + k * ((hs - 8) / Math.max(1, half - 1)); s += C(left ? cx - 5.6 : cx + 5.6, y, 1.3, 0.8) + L(left ? cx - 4.3 : cx + 4.3, y, left ? cx - 3.8 : cx + 3.8, y, 0.8) })
+  s += L(cx - nw / 2, nutY, cx + nw / 2, nutY, 1.4)
+  // braço, trastes e marcações
+  s += R(cx - nw / 2, nutY, nw, neckL + 4, 0.8)
+  range(bass ? 20 : 21).forEach(i => { s += L(cx - nw / 2, nutY + 2.4 + i * 2.35, cx + nw / 2, nutY + 2.4 + i * 2.35, 0.25) })
+  ;[3, 5, 7, 9].forEach(f => { s += C(cx, nutY + 2.4 + (f - 0.5) * 2.35, 0.55, 0.5) })
+  // corpo (contorno com chifres)
+  const y0 = bodyTop, k = bodyL / 46
+  const half2 = (sg: number) => `C${cx + sg * 6} ${y0 + 3} ${cx + sg * 8} ${y0 - 7} ${cx + sg * 12} ${y0 - 6}C${cx + sg * 16} ${y0 - 5} ${cx + sg * 16} ${y0 + 6} ${cx + sg * 14} ${y0 + 13}C${cx + sg * 12} ${y0 + 18} ${cx + sg * 17} ${y0 + 22 * k} ${cx + sg * 17} ${y0 + 32 * k}C${cx + sg * 17} ${y0 + 44 * k} ${cx + sg * 10} ${y0 + bodyL} ${cx} ${y0 + bodyL}`
+  const back = (sg: number) => `C${cx + sg * 10} ${y0 + bodyL} ${cx + sg * 17} ${y0 + 44 * k} ${cx + sg * 17} ${y0 + 32 * k}C${cx + sg * 17} ${y0 + 22 * k} ${cx + sg * 12} ${y0 + 18} ${cx + sg * 14} ${y0 + 13}C${cx + sg * 16} ${y0 + 6} ${cx + sg * 16} ${y0 - 5} ${cx + sg * 12} ${y0 - 6}C${cx + sg * 8} ${y0 - 7} ${cx + sg * 6} ${y0 + 3} ${cx + sg * 3} ${y0 + 3}`
+  s += sk(`M${cx - 3} ${y0 + 3}` + half2(-1) + back(1) + 'Z', 1)
+  // cordas
+  const sp = (nw - 1.2) / Math.max(1, strings - 1), bsp = (bass ? 6.6 : 5.6) / Math.max(1, strings - 1)
+  range(strings).forEach(i => { s += L(cx - (nw - 1.2) / 2 + i * sp, nutY, cx - (bass ? 3.3 : 2.8) + i * bsp, bridgeY, 0.25) })
+  // captadores, ponte, controles, plugue
+  const pk = bass ? [bridgeY - 24, bridgeY - 13] : [bridgeY - 25, bridgeY - 17, bridgeY - 9]
+  pk.forEach(y => { s += R(cx - (bass ? 6.5 : 7), y, bass ? 13 : 14, 3.4, 1, 0.8) })
+  s += R(cx - (bass ? 6.5 : 5.5), bridgeY, bass ? 13 : 11, 3, 0.8, 0.9) + range(strings).map(i => C(cx - (bass ? 3.3 : 2.8) + i * bsp, bridgeY + 1.5, 0.35, 0.4)).join('')
+  s += C(cx + 10, bridgeY - 4, 1.6, 0.8) + C(cx + 10, bridgeY + 3, 1.6, 0.8) + C(cx - 10, bridgeY + 3, 1.4, 0.7, '$A') + R(cx + 6, bridgeY + 8, 3.4, 2.2, 0.8, 0.7)
+  return { w: W, h: H, d: s }
+}
+
+// ---------- spot / retorno de palco (vista superior) ----------
+function wedge(P: Params): Glyph {
+  const inch = N(P, 'size', 12), w = inch * 2.54 * 1.85, d = w * 0.72, tw = w * 0.72, x0 = (w - tw) / 2
+  const sx = 3, sy = 3.6 // folga da grelha
+  const outer = `M${x0 + 3} 0H${x0 + tw - 3}Q${x0 + tw} 0 ${x0 + tw + 1.6} 3L${w - 0.6} ${d - 4}Q${w + 0.4} ${d} ${w - 3.6} ${d}H3.6Q-0.4 ${d} 0.6 ${d - 4}L${x0 - 1.6} 3Q${x0} 0 ${x0 + 3} 0Z`
+  const gx = (k: number) => x0 + sx + k, inner = `M${x0 + sx + 2} ${sy}H${x0 + tw - sx - 2}L${w - sx - 3.4} ${d - sy - 4}H${sx + 3.4}Z`
+  const r = Math.min(inch * 2.54 * 0.4, d * 0.34), cy = d * 0.58
+  let s = sk(outer, 1) + sk(inner, 0.8)
+  s += C(w / 2, cy, r, 0.9) + C(w / 2, cy, r * 0.78, 0.5) + C(w / 2, cy, r * 0.3, 0.6)
+  if (inch >= 12) s += R(w / 2 - 6, sy + 3, 12, 3.4, 1.4, 0.7)
+  s += R(w / 2 - 9, d - 2.2, 18, 1.8, 0.9, 0.7) + C(sx + 9, d - sy - 6.5, 1.2, 1, '$A')
+  void gx
+  return { w: w + 2, h: d + 2, d: place(1, 1, s) }
+}
+
 export const DYN: Record<string, (P: Params) => Glyph> = {
   guitar_amp: P => cabinet(N(P, 'speakers', 2), N(P, 'size', 12), B(P, 'head'), false),
   bass_amp: P => cabinet(N(P, 'speakers', 4), N(P, 'size', 10), B(P, 'head'), true),
-  drums, perc, keys,
+  drums, perc, keys, wedge,
+  eguitar: P => electric(false, N(P, 'strings', 6)),
+  ebass: P => electric(true, N(P, 'strings', 4)),
 }

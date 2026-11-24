@@ -17,8 +17,13 @@ describe('pacote D (semi-realista, muda com a configuração)', () => {
   })
   it('bateria: bumbos, tons e surdos alteram o glifo; extras (pratos, banco, chimbal) não são desenhados', () => {
     const base = build('drums', { toms: 2, floors: 1 }).svg
-    expect(build('drums', { stool: true, hhmachine: true, kickpedal: true, stands: 6 }).svg).toBe(base)
+    expect(build('drums', { toms: 2 }).svg).toBe(base)
     expect(build('drums', { toms: 4 }).svg).not.toBe(build('drums', { toms: 1 }).svg)
+  })
+  it('guitarra/baixo: cordas mudam o glifo; spot acompanha o tamanho', () => {
+    expect(build('eguitar', { strings: '6' }).svg).not.toBe(build('eguitar', { strings: '8' }).svg)
+    expect(build('ebass', { strings: '4' }).h).toBeGreaterThan(build('eguitar', {}).h)
+    expect(build('wedge', { size: '15' }).w).toBeGreaterThan(build('wedge', { size: '10' }).w)
   })
   it('bateria (tamanho): tons, bumbos e surdos alteram o glifo', () => {
     const a = build('drums', { toms: 1 }), b = build('drums', { toms: 4 })
