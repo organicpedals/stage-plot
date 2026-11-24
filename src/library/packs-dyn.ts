@@ -44,7 +44,6 @@ function cabinet(n: number, inch: number, head: boolean, bass: boolean): Glyph {
   }
   const gx = x0 + pad * 0.55, gy = y0 + panelH + pad * 0.55, gW = bw - pad * 1.1, gH = bh - panelH - pad * 1.1
   s += R(gx, gy, gW, gH, 1.5, 0.8)
-  for (let y = gy + 3.2; y < gy + gH - 1; y += 3.6) s += L(gx + 1, y, gx + gW - 1, y, 0.3)
   used.forEach(([c, r]) => { s += speaker(gx + (gW - gw) / 2 + d / 2 + c * (d + gap), gy + (gH - gh) / 2 + d / 2 + r * (d + gap), d) })
   s += R(x0 + 3, y0 + bh, 5, 3, 1, 0.8) + R(x0 + bw - 8, y0 + bh, 5, 3, 1, 0.8)
   return { w: W, h: H, d: s }
