@@ -17,7 +17,8 @@ export interface ParamDef {
   min?: number; max?: number; step?: number
   opts?: string[]
 }
-export interface Chan { name: string; mic: string; stand: string; phantom?: boolean }
+/** kid: sufixo estável da chave do canal (edições/ordem não se deslocam quando canais são inseridos antes dele). */
+export interface Chan { name: string; mic: string; stand: string; phantom?: boolean; kid?: string }
 export interface Built { w: number; h: number; svg: string }
 type Tr = (pt: string, en: string) => string
 
@@ -137,16 +138,19 @@ const drums: IconDef = {
   channels: (P, _b, t) => {
     const out: Chan[] = [], k = N(P, 'kick')
     for (let i = 0; i < k; i++) {
-      const nm = k > 1 ? t(`Bumbo ${i + 1}`, `Kick ${i + 1}`) : t('Bumbo', 'Kick')
-      if (B(P, 'kicksplit')) { out.push({ name: `${nm} in`, mic: 'Beta 91 / D112', stand: t('Dentro do bumbo', 'Inside kick') }); out.push({ name: `${nm} out`, mic: 'Beta 52 / D12', stand: 'Mini boom' }) }
-      else out.push({ name: nm, mic: 'Beta 52 / D112', stand: 'Mini boom' })
+      const nm = k > 1 ? t(`Bumbo ${i + 1}`, `Kick ${i + 1}`) : t('Bumbo', 'Kick'), id = i ? `k${i}` : '0'
+      if (B(P, 'kicksplit')) { out.push({ name: `${nm} in`, mic: 'Beta 91 / D112', stand: t('Dentro do bumbo', 'Inside kick'), kid: id }); out.push({ name: `${nm} out`, mic: 'Beta 52 / D12', stand: 'Mini boom', kid: id + 'x' }) }
+      else out.push({ name: nm, mic: 'Beta 52 / D112', stand: 'Mini boom', kid: id })
     }
-    out.push({ name: t('Caixa', 'Snare'), mic: 'SM57', stand: 'Mini boom' })
-    out.push({ name: t('Caixa bottom', 'Snare bottom'), mic: 'SM57', stand: 'Mini boom' })
-    for (let i = 0; i < N(P, 'toms'); i++) out.push({ name: `Tom ${i + 1}`, mic: 'e604', stand: 'Clip' })
-    for (let i = 0; i < N(P, 'floors'); i++) out.push({ name: t(`Surdo ${i + 1}`, `Floor tom ${i + 1}`), mic: 'e604', stand: 'Clip' })
-    out.push({ name: 'Hi-hat', mic: t('Condensador', 'Condenser'), stand: 'Boom', phantom: true })
-    out.push({ name: 'OH L', mic: t('Condensador', 'Condenser'), stand: 'Boom', phantom: true }); out.push({ name: 'OH R', mic: t('Condensador', 'Condenser'), stand: 'Boom', phantom: true })
+    // demais canais: chave = posição como se houvesse 1 bumbo (estável com split e com o nº de bumbos)
+    const rest: Chan[] = []
+    rest.push({ name: t('Caixa', 'Snare'), mic: 'SM57', stand: 'Mini boom' })
+    rest.push({ name: t('Caixa bottom', 'Snare bottom'), mic: 'SM57', stand: 'Mini boom' })
+    for (let i = 0; i < N(P, 'toms'); i++) rest.push({ name: `Tom ${i + 1}`, mic: 'e604', stand: 'Clip' })
+    for (let i = 0; i < N(P, 'floors'); i++) rest.push({ name: t(`Surdo ${i + 1}`, `Floor tom ${i + 1}`), mic: 'e604', stand: 'Clip' })
+    rest.push({ name: 'Hi-hat', mic: t('Condensador', 'Condenser'), stand: 'Boom', phantom: true })
+    rest.push({ name: 'OH L', mic: t('Condensador', 'Condenser'), stand: 'Boom', phantom: true }); rest.push({ name: 'OH R', mic: t('Condensador', 'Condenser'), stand: 'Boom', phantom: true })
+    rest.forEach((c, j) => out.push({ ...c, kid: String(j + 1) }))
     return out
   },
 }

@@ -22,7 +22,7 @@ function generated(p: Project): ChannelRow[] {
     chans.forEach((c0, idx) => {
       // nome dado ao item no mapa aparece na input list; em itens de vários canais (ex.: bateria) vira prefixo
       const c = lbl && chans.length > 1 && !c0.name.toLowerCase().includes(lbl.toLowerCase()) ? { ...c0, name: `${lbl} · ${c0.name}` } : c0
-      const key = `${it.id}:${idx}`
+      const key = `${it.id}:${c0.kid ?? idx}`
       const ov = p.chan.ov[key]
       out.push({
         key, ch: 0, itemId: it.id, manual: false, edited: !!ov && Object.keys(ov).length > 0,
@@ -39,7 +39,10 @@ export function inputList(p: Project): ChannelRow[] {
   const all = [...generated(p), ...manual]
   if (p.chan.order.length) {
     const idx = new Map(p.chan.order.map((k, i) => [k, i]))
-    all.sort((a, b) => (idx.get(a.key) ?? 9999) - (idx.get(b.key) ?? 9999))
+    // canal novo (fora da ordem salva) entra logo depois do canal que o antecede, não no fim da lista
+    let last = -1
+    const pos = new Map(all.map(r => { const o = idx.get(r.key); if (o !== undefined) last = o; return [r.key, o ?? (r.manual ? 9999 : last + 0.5)] }))
+    all.sort((a, b) => pos.get(a.key)! - pos.get(b.key)!)
   }
   return all.map((r, i) => ({ ...r, ch: i + 1 }))
 }

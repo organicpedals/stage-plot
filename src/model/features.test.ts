@@ -41,6 +41,16 @@ describe('bumbo split', () => {
     expect(names.length).toBe(base + 1); expect(names).toEqual(expect.arrayContaining(['Bumbo in', 'Bumbo out'])); expect(names).not.toContain('Bumbo')
     expect(itemParams(d).kicksplit).toBe(true); expect(ICON_MAP.drums.params.some(x => x.key === 'kicksplit')).toBe(true)
   })
+  it('ligar o split não desloca edições nem a ordem (OH) e põe o novo canal ao lado do bumbo', () => {
+    const p = newProject('B'); const d = p.items.find(i => i.kind === 'drums')!
+    const before = inputList(p); p.chan.order = before.map(r => r.key)
+    const oh = before.find(r => r.name === 'OH L')!; p.chan.ov[oh.key] = { mic: 'KM184' }
+    d.params = { ...d.params, kicksplit: true }
+    const after = inputList(p), names = after.map(r => r.name)
+    expect(after.find(r => r.name === 'OH L')!.mic).toBe('KM184'); expect(after.find(r => r.name === 'Caixa')!.mic).toBe('SM57')
+    const k = names.indexOf('Bumbo in'); expect(names.slice(k, k + 2)).toEqual(['Bumbo in', 'Bumbo out'])
+    expect(names.filter(n => n !== 'Bumbo in' && n !== 'Bumbo out')).toEqual(before.map(r => r.name).filter(n => n !== 'Bumbo'))
+  })
   it('com 2 bumbos gera 4 canais de bumbo', () => {
     const p = newProject('B'); const d = p.items.find(i => i.kind === 'drums')!
     d.params = { ...d.params, kicksplit: true, kick: 2 }
