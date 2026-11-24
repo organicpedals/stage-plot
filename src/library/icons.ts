@@ -208,7 +208,7 @@ const piano: IconDef = {
 
 const guitarAmp: IconDef = {
   id: 'guitar_amp', cat: 'amp', board: 'stage', label: { pt: 'Ampli guitarra', en: 'Guitar amp' },
-  params: [sel('brand', 'Marca (visual)', 'Brand (look)', 'Fender', ['Fender', 'Marshall', 'Vox', 'Orange', 'Genérico']), sel('speakers', 'Alto-falantes', 'Speakers', '2', ['1', '2', '4']), sel('size', 'Tamanho (pol.)', 'Size (in)', '12', ['8', '10', '12']), bool('head', 'Cabeçote', 'Head', false), num('mics', 'Microfones', 'Mics', 1, 0, 2), bool('di', 'Saída DI', 'DI out', false)],
+  params: [sel('speakers', 'Alto-falantes', 'Speakers', '2', ['1', '2', '4']), sel('size', 'Tamanho (pol.)', 'Size (in)', '12', ['8', '10', '12']), bool('head', 'Cabeçote', 'Head', false), num('mics', 'Microfones', 'Mics', 1, 0, 2), bool('di', 'Saída DI', 'DI out', false)],
   build: () => ART.guitarAmp,
   spec: P => `${S(P, 'speakers')}×${S(P, 'size')}"${B(P, 'head') ? ' + head' : ''}`,
   channels: (P, base, t) => {
@@ -220,7 +220,7 @@ const guitarAmp: IconDef = {
 }
 const bassAmp: IconDef = {
   id: 'bass_amp', cat: 'amp', board: 'stage', label: { pt: 'Ampli baixo', en: 'Bass amp' },
-  params: [sel('brand', 'Marca (visual)', 'Brand (look)', 'Ampeg', ['Ampeg', 'Fender', 'Markbass', 'Genérico']), sel('speakers', 'Alto-falantes', 'Speakers', '4', ['1', '2', '4', '6', '8']), sel('size', 'Tamanho (pol.)', 'Size (in)', '10', ['10', '12', '15', '18']), bool('head', 'Cabeçote', 'Head', true), bool('di', 'Saída DI', 'DI out', true), bool('mic', 'Microfone no gabinete', 'Cab mic', false)],
+  params: [sel('speakers', 'Alto-falantes', 'Speakers', '4', ['1', '2', '4', '6', '8']), sel('size', 'Tamanho (pol.)', 'Size (in)', '10', ['10', '12', '15', '18']), bool('head', 'Cabeçote', 'Head', true), bool('di', 'Saída DI', 'DI out', true), bool('mic', 'Microfone no gabinete', 'Cab mic', false)],
   build: () => ART.bassAmp,
   spec: P => `${S(P, 'speakers')}×${S(P, 'size')}"${B(P, 'head') ? ' + head' : ''}`,
   channels: (P, base, t) => {

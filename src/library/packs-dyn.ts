@@ -15,54 +15,37 @@ const C = (x: number, y: number, r: number, m = 1, c = '$I') => `<circle cx="${x
 const L = (x1: number, y1: number, x2: number, y2: number, m = 1) => sk(`M${x1.toFixed(2)} ${y1.toFixed(2)}L${x2.toFixed(2)} ${y2.toFixed(2)}`, m)
 const place = (x: number, y: number, inner: string) => `<g transform="translate(${x.toFixed(2)} ${y.toFixed(2)})">${inner}</g>`
 const range = (n: number) => Array.from({ length: Math.max(0, Math.floor(n)) }, (_, i) => i)
-/** diagonais dentro de um retângulo (para a treliça da grelha) */
-const diag = (x: number, y: number, w: number, h: number, step: number, up: boolean, m: number) => {
-  let s = ''
-  for (let k = -h; k < w; k += step) {
-    const a = Math.max(0, k), b = Math.min(w, k + h)
-    if (b <= a) continue
-    s += up ? L(x + a, y + h - (a - k), x + b, y + h - (b - k), m) : L(x + a, y + (a - k), x + b, y + (b - k), m)
-  }
-  return s
-}
 const knobs = (x: number, y: number, n: number, gap: number, r: number) => range(n).map(i => C(x + i * gap, y, r, 0.8) + L(x + i * gap, y, x + i * gap + Math.sin(i * 1.3) * r * 0.8, y - Math.cos(i * 1.3) * r * 0.8, 0.6)).join('')
 const speaker = (cx: number, cy: number, d: number) => C(cx, cy, d / 2, 0.9) + C(cx, cy, d * 0.4, 0.5) + C(cx, cy, d * 0.12, 0.6)
 const ledA = (x: number, y: number) => C(x, y, 1.2, 1, '$A')
 
 // ---------- amplificadores ----------
-function cabinet(n: number, inch: number, head: boolean, brand: string, bass: boolean): Glyph {
-  const [cols, rows] = bass ? ({ 1: [1, 1], 2: [1, 2], 4: [2, 2], 6: [2, 3], 8: [2, 4] } as Record<number, [number, number]>)[n] ?? [1, 1] : n === 4 ? [2, 2] : [n, 1]
+function cabinet(n: number, inch: number, head: boolean, bass: boolean): Glyph {
+  // o gabinete tem sempre o tamanho mínimo de 2 alto-falantes (guitarra: 2x12; baixo: 4 alto-falantes); com menos, só desenha menos falantes
+  const [cols, rows] = bass ? ({ 1: [2, 2], 2: [2, 2], 4: [2, 2], 6: [2, 3], 8: [2, 4] } as Record<number, [number, number]>)[n] ?? [2, 2] : n >= 4 ? [2, 2] : [2, 1]
+  const slots: [number, number][] = range(cols * rows).map(i => [i % cols, Math.floor(i / cols)])
+  const used: [number, number][] = n >= cols * rows ? slots : n === 1 ? [[(cols - 1) / 2, (rows - 1) / 2]] : n === 2 && rows === 2 ? [[0, 0.5], [1, 0.5]] : slots.slice(0, n)
   const d = inch * 2.54 * 0.88, gap = 3.5, pad = 4.5
   const gw = cols * d + (cols - 1) * gap, gh = rows * d + (rows - 1) * gap
   const combo = !head, panelH = combo && !bass ? 13 : 0
   const bw = gw + pad * 2, bh = gh + pad * 2 + panelH
   const hh = head ? (bass ? 15 : 20) : 0, hw = head ? Math.min(Math.max(bw, 48), bass ? 56 : 72) : 0
   const W = Math.max(bw, hw) + 4, H = hh + bh + 7, x0 = (W - bw) / 2, y0 = hh
-  const vox = brand === 'Vox', rad = vox ? 7 : 3
   let s = ''
   if (head) {
-    const hx = (W - hw) / 2
+    const hx = (W - hw) / 2, kn = Math.min(6, Math.floor((hw - 24) / 7))
     s += R(hx, 0, hw, hh, 2.5) + sk(`M${hx + hw / 2 - 8} 0V-2.4h16V0`, 0.9)
-    const kn = Math.min(brand === 'Marshall' ? 8 : brand === 'Orange' ? 5 : 6, Math.floor((hw - 24) / 7))
-    s += knobs(hx + 9, hh / 2 + 1, kn, (hw - 28) / Math.max(1, kn - 1), brand === 'Marshall' ? 1.8 : 2.1) + R(hx + hw - 16, hh / 2 - 2.6, 8, 5.2, 1, 0.6) + ledA(hx + hw - 4, hh / 2)
-    if (brand === 'Marshall') s += R(hx + 3, 2.4, hw - 6, 3.2, 1, 0.5)
+    s += knobs(hx + 9, hh / 2 + 1, kn, (hw - 28) / Math.max(1, kn - 1), 2.1) + R(hx + hw - 16, hh / 2 - 2.6, 8, 5.2, 1, 0.6) + ledA(hx + hw - 4, hh / 2)
   }
-  s += R(x0, y0, bw, bh, rad)
+  s += R(x0, y0, bw, bh, 3)
   if (panelH) {
-    s += L(x0 + 1.5, y0 + panelH, x0 + bw - 1.5, y0 + panelH, 0.8)
-    const kn = Math.min(brand === 'Marshall' ? 7 : brand === 'Orange' ? 4 : 6, Math.floor((bw - 24) / 7))
-    s += knobs(x0 + 9, y0 + panelH / 2, kn, (bw - 28) / Math.max(1, kn - 1), 2) + ledA(x0 + bw - 6, y0 + panelH / 2)
-    if (brand === 'Marshall') s += R(x0 + bw / 2 - 14, y0 + 1.6, 28, 2.4, 1, 0.5)
+    const kn = Math.min(6, Math.floor((bw - 24) / 7))
+    s += L(x0 + 1.5, y0 + panelH, x0 + bw - 1.5, y0 + panelH, 0.8) + knobs(x0 + 9, y0 + panelH / 2, kn, (bw - 28) / Math.max(1, kn - 1), 2) + ledA(x0 + bw - 6, y0 + panelH / 2)
   }
   const gx = x0 + pad * 0.55, gy = y0 + panelH + pad * 0.55, gW = bw - pad * 1.1, gH = bh - panelH - pad * 1.1
-  s += R(gx, gy, gW, gH, vox ? 4 : 1.5, 0.8)
-  if (brand === 'Fender') { for (let x = gx + 3; x < gx + gW - 1; x += 3.4) s += L(x, gy + 1, x, gy + gH - 1, 0.3); if (!head) s += R(x0 + bw / 2 - 8, y0 + bh - 4.2, 16, 2.6, 1, 0.6) }
-  else if (brand === 'Marshall') { for (let x = gx + 4; x < gx + gW; x += 5) s += L(x, gy + 1, x, gy + gH - 1, 0.3); for (let y = gy + 4; y < gy + gH; y += 5) s += L(gx + 1, y, gx + gW - 1, y, 0.3); s += R(gx + 1.6, gy + 1.6, gW - 3.2, gH - 3.2, 1, 0.5) }
-  else if (vox) { s += diag(gx, gy, gW, gH, 7, false, 0.3) + diag(gx, gy, gW, gH, 7, true, 0.3) }
-  else if (brand === 'Orange') { for (let y = gy + 3; y < gy + gH; y += 3.6) s += L(gx + 1, y, gx + gW - 1, y, 0.5) }
-  else if (brand === 'Ampeg') { for (let x = gx + 4; x < gx + gW; x += 4.4) s += L(x, gy + 1, x, gy + gH - 1, 0.3); for (let y = gy + 4; y < gy + gH; y += 4.4) s += L(gx + 1, y, gx + gW - 1, y, 0.3) }
-  else if (brand === 'Markbass') { for (let i = 0; i < 4; i++) s += R(gx + gW * 0.2, gy + 2.5 + i * 3.2, gW * 0.6, 1.6, 0.8, 0.5) }
-  range(cols * rows).forEach(i => { const c = i % cols, r = Math.floor(i / cols); s += speaker(gx + (gW - gw) / 2 + d / 2 + c * (d + gap), gy + (gH - gh) / 2 + d / 2 + r * (d + gap), d) })
+  s += R(gx, gy, gW, gH, 1.5, 0.8)
+  for (let y = gy + 3.2; y < gy + gH - 1; y += 3.6) s += L(gx + 1, y, gx + gW - 1, y, 0.3)
+  used.forEach(([c, r]) => { s += speaker(gx + (gW - gw) / 2 + d / 2 + c * (d + gap), gy + (gH - gh) / 2 + d / 2 + r * (d + gap), d) })
   s += R(x0 + 3, y0 + bh, 5, 3, 1, 0.8) + R(x0 + bw - 8, y0 + bh, 5, 3, 1, 0.8)
   return { w: W, h: H, d: s }
 }
@@ -70,30 +53,28 @@ function cabinet(n: number, inch: number, head: boolean, brand: string, bass: bo
 // ---------- bateria (vista superior; baterista embaixo) ----------
 const drumTop = (cx: number, cy: number, r: number, lugs = 8, accent = false) =>
   C(cx, cy, r, 1) + C(cx, cy, r - 1.5, 0.5) + C(cx, cy, r * 0.42, 0.45, accent ? '$A' : '$I') + range(lugs).map(i => { const a = (i * 2 * Math.PI) / lugs + 0.2; return L(cx + Math.cos(a) * (r + 0.4), cy + Math.sin(a) * (r + 0.4), cx + Math.cos(a) * (r + 2.4), cy + Math.sin(a) * (r + 2.4), 0.9) }).join('')
-const cymbalTop = (cx: number, cy: number, r: number) => C(cx, cy, r, 1) + C(cx, cy, r * 0.6, 0.4) + C(cx, cy, r * 0.17, 0.7)
 
+// Montagem de um kit em vista superior (baterista embaixo, plateia em cima, destro):
+// bumbo no centro à frente; tons de bumbo logo atrás dele (menor à esquerda, maior à direita); caixa entre os joelhos (um pouco à esquerda);
+// surdos à direita do baterista. Só o "shell pack": sem pratos, estantes, banco, pedais ou chimbal.
+const TOM_IN: Record<number, number[]> = { 0: [], 1: [12], 2: [10, 12], 3: [10, 12, 13], 4: [8, 10, 12, 13] }
 function drums(P: Params): Glyph {
-  const k = Math.max(1, N(P, 'kick', 1)), t = N(P, 'toms', 2), f = N(P, 'floors', 1), stands = N(P, 'stands', 0)
+  const k = Math.min(2, Math.max(1, N(P, 'kick', 1))), t = Math.min(4, Math.max(0, N(P, 'toms', 2))), f = Math.min(2, Math.max(0, N(P, 'floors', 1)))
   const parts: { s: string; x0: number; y0: number; x1: number; y1: number }[] = []
-  const add = (s: string, x0: number, y0: number, x1: number, y1: number) => parts.push({ s, x0, y0, x1, y1 })
-  const kw = 56, kd = 38, kgap = 6
-  const kx = range(k).map(i => (i - (k - 1) / 2) * (kw + kgap))
-  kx.forEach((x, i) => {
-    let s = R(x - kw / 2, 0, kw, kd, 3) + L(x - kw / 2, 4, x + kw / 2, 4, 0.7) + L(x - kw / 2, kd - 4, x + kw / 2, kd - 4, 0.7) + range(5).map(j => L(x - 20 + j * 10, 4, x - 20 + j * 10, kd - 4, 0.4)).join('')
-    s += L(x - kw / 2 - 1, 8, x - kw / 2 - 6, 16, 0.9) + L(x + kw / 2 + 1, 8, x + kw / 2 + 6, 16, 0.9)
-    if (B(P, 'kickpedal') || i === 0) s += R(x - 6, kd + 3, 12, 20, 2, 0.9) + L(x, kd + 3, x, kd - 3, 0.9)
-    add(s, x - kw / 2 - 6, 0, x + kw / 2 + 6, kd + 23)
-  })
-  const cxm = 0, ty = -14
-  const tpos: Record<number, [number, number][]> = { 0: [], 1: [[0, ty]], 2: [[-17, ty - 2], [17, ty - 2]], 3: [[-34, ty + 2], [0, ty - 8], [34, ty + 2]], 4: [[-46, ty + 6], [-16, ty - 6], [16, ty - 6], [46, ty + 6]] }
-  ;(tpos[Math.min(4, t)] ?? []).forEach(([x, y], i) => add(drumTop(cxm + x, y, t >= 3 ? 14 : 15.5, 8, i === 0), cxm + x - 18, y - 18, cxm + x + 18, y + 18))
-  const half = (kx[kx.length - 1] + kw / 2 + 6)
-  add(drumTop(-half - 22, 22, 18, 10), -half - 42, 2, -half - 2, 42) // caixa
-  if (B(P, 'hhmachine')) add(C(-half - 72, 26, 16, 1) + C(-half - 66, 30, 16, 0.6) + C(-half - 72, 26, 5, 0.5) + R(-half - 76, 46, 8, 14, 2, 0.8), -half - 90, 8, -half - 46, 60)
-  range(Math.min(2, f)).forEach(i => add(drumTop(half + 26 + i * 4, 16 + i * 44, 20 + i * 1.5, 10), half + 2, i * 44 - 8, half + 52, i * 44 + 44))
-  const cym: [number, number, number][] = [[-66, -62, 22], [66, -66, 24], [-22, -64, 20], [32, -72, 21], [-104, -30, 20], [108, -34, 21], [-52, -88, 19], [54, -94, 19]]
-  cym.slice(0, Math.min(8, stands)).forEach(([x, y, r]) => add(cymbalTop(x, y, r), x - r, y - r, x + r, y + r))
-  if (B(P, 'stool')) add(C(0, 86, 18, 1) + C(0, 86, 12, 0.5) + C(0, 86, 3, 0.5), -18, 68, 18, 104)
+  const add = (s: string, cx: number, cy: number, r: number) => parts.push({ s, x0: cx - r - 3, y0: cy - r - 3, x1: cx + r + 3, y1: cy + r + 3 })
+  const kw = 56, kd = 40
+  const kx = range(k).map(i => (i - (k - 1) / 2) * (kw + 4))
+  kx.forEach(x => { parts.push({ s: R(x - kw / 2, 0, kw, kd, 3) + L(x - kw / 2, 4, x + kw / 2, 4, 0.7) + L(x - kw / 2, kd - 4, x + kw / 2, kd - 4, 0.7) + range(5).map(j => L(x - 20 + j * 10, 4, x - 20 + j * 10, kd - 4, 0.4)).join('') + L(x - kw / 2 - 1, 8, x - kw / 2 - 5, 15, 0.9) + L(x + kw / 2 + 1, 8, x + kw / 2 + 5, 15, 0.9), x0: x - kw / 2 - 6, y0: 0, x1: x + kw / 2 + 6, y1: kd }) })
+  const sizes = TOM_IN[t] ?? [], gapT = 3, rs = sizes.map(s => (s * 2.54) / 2)
+  const total = rs.reduce((a, r) => a + 2 * r, 0) + gapT * Math.max(0, rs.length - 1)
+  let cx = -total / 2
+  rs.forEach((r, i) => { cx += r; add(drumTop(cx, kd + 10 + r * 0.6 + Math.abs(i - (rs.length - 1) / 2) * 1.2, r, 8, i === 0), cx, kd + 10 + r * 0.6 + Math.abs(i - (rs.length - 1) / 2) * 1.2, r); cx += r + gapT })
+  const half = kx[kx.length - 1] + kw / 2 + 6, tomBottom = kd + 10 + (rs.length ? Math.max(...rs) * 1.6 : 0)
+  const sy = Math.max(kd + 32, tomBottom + 18)
+  add(drumTop(-12, sy, 18, 10), -12, sy, 18) // caixa 14"
+  const fr = [(16 * 2.54) / 2, (14 * 2.54) / 2]
+  let fx = Math.max(half + 6, 44)
+  range(f).forEach(i => { const r = fr[i]; fx += r; add(drumTop(fx, sy - 2, r, 10), fx, sy - 2, r); fx += r + 3 })
   const minX = Math.min(...parts.map(p => p.x0)), minY = Math.min(...parts.map(p => p.y0)), maxX = Math.max(...parts.map(p => p.x1)), maxY = Math.max(...parts.map(p => p.y1))
   return { w: maxX - minX + 4, h: maxY - minY + 4, d: place(2 - minX, 2 - minY, parts.map(p => p.s).join('')) }
 }
@@ -133,7 +114,7 @@ function keys(P: Params): Glyph {
 }
 
 export const DYN: Record<string, (P: Params) => Glyph> = {
-  guitar_amp: P => cabinet(N(P, 'speakers', 2), N(P, 'size', 12), B(P, 'head'), S(P, 'brand') || 'Fender', false),
-  bass_amp: P => cabinet(N(P, 'speakers', 4), N(P, 'size', 10), B(P, 'head'), S(P, 'brand') || 'Ampeg', true),
+  guitar_amp: P => cabinet(N(P, 'speakers', 2), N(P, 'size', 12), B(P, 'head'), false),
+  bass_amp: P => cabinet(N(P, 'speakers', 4), N(P, 'size', 10), B(P, 'head'), true),
   drums, perc, keys,
 }
