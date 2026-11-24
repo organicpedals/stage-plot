@@ -17,9 +17,9 @@ function ParamField({ d, value, lang, onChange }: { d: ParamDef; value: Pv; lang
   return (
     <label>{label}
       <span className="stepper">
-        <button type="button" onClick={() => stepper(-(d.step ?? 1))}>−</button>
+        <button title={lang === 'pt' ? 'Diminui' : 'Decrease'} type="button" onClick={() => stepper(-(d.step ?? 1))}>−</button>
         <NumInput min={d.min} max={d.max} step={d.step ?? 1} value={n} onChange={onChange} />
-        <button type="button" onClick={() => stepper(d.step ?? 1)}>+</button>
+        <button title={lang === 'pt' ? 'Aumenta' : 'Increase'} type="button" onClick={() => stepper(d.step ?? 1)}>+</button>
       </span>
     </label>
   )
@@ -50,7 +50,7 @@ function MultiProps({ p, sel }: { p: Project; sel: Item[] }) {
           <MusicianInput p={p} value={same(players.map(i => i.who)) ? players[0].who : ''} placeholder={same(players.map(i => i.who)) ? (pt ? 'Escolha ou digite' : 'Pick or type') : mixed}
             onChange={v => update(pr => { for (const x of pr.items) if (players.some(i => i.id === x.id)) x.who = v }, false)} />
         </label>)}
-      {lights.length > 0 && <label>DMX<input value={same(lights.map(i => i.dmx)) ? lights[0].dmx : ''} placeholder={same(lights.map(i => i.dmx)) ? '1.001' : mixed} onChange={e => update(pr => { for (const x of pr.items) if (lights.some(i => i.id === x.id)) x.dmx = e.target.value }, false)} /></label>}
+      {lights.length > 0 && <label title={pt ? 'Endereço DMX (universo.canal), usado no patch de luz' : 'DMX address (universe.channel), used in the light patch'}>DMX<input value={same(lights.map(i => i.dmx)) ? lights[0].dmx : ''} placeholder={same(lights.map(i => i.dmx)) ? '1.001' : mixed} onChange={e => update(pr => { for (const x of pr.items) if (lights.some(i => i.id === x.id)) x.dmx = e.target.value }, false)} /></label>}
       {params.length > 0 && <div className="parbox">
         {params.map(({ d, vals }) => <ParamField key={d.key} d={d} value={vals[0]} lang={p.lang} onChange={v => each(x => { x.params = { ...x.params, [d.key]: v } })} />)}
       </div>}
@@ -58,9 +58,9 @@ function MultiProps({ p, sel }: { p: Project; sel: Item[] }) {
         <span className="slide"><input type="range" min={-180} max={180} step={5} value={rots[0]} onChange={e => each(x => { x.rot = +e.target.value })} /><NumInput min={-360} max={360} step={5} value={rots[0]} onChange={v => each(x => { x.rot = v })} /></span></div>
       <div className="field">{pt ? 'Tamanho (×)' : 'Size (×)'}
         <span className="slide"><input type="range" min={0.4} max={3} step={0.1} value={Math.min(3, Math.max(0.4, scales[0]))} onChange={e => each(x => { x.scale = +e.target.value })} /><NumInput min={0.1} max={10} step={0.1} value={scales[0]} onChange={v => each(x => { x.scale = v })} /></span></div>
-      <label className="chk"><input type="checkbox" checked={sel.every(i => !i.hidden)} onChange={e => each(x => { x.hidden = !e.target.checked }, true)} /> {pt ? 'Visível no mapa' : 'Visible on map'}</label>
-      <label className="chk"><input type="checkbox" checked={sel.every(i => i.locked)} onChange={e => each(x => { x.locked = e.target.checked }, true)} /> {pt ? 'Travar posição' : 'Lock position'}</label>
-      <button className="danger" onClick={() => { update(pr => { pr.items = pr.items.filter(i => !ids.includes(i.id)) }); select([]) }}>{pt ? `Remover ${sel.length} itens` : `Remove ${sel.length} items`}</button>
+      <label title={pt ? 'Mostra ou oculta os itens no mapa e nos PDFs' : 'Show or hide the items on the plot and in the PDFs'} className="chk"><input type="checkbox" checked={sel.every(i => !i.hidden)} onChange={e => each(x => { x.hidden = !e.target.checked }, true)} /> {pt ? 'Visível no mapa' : 'Visible on map'}</label>
+      <label title={pt ? 'Impede que o item seja movido por arrasto ou setas' : 'Prevents the item from being moved by drag or arrow keys'} className="chk"><input type="checkbox" checked={sel.every(i => i.locked)} onChange={e => each(x => { x.locked = e.target.checked }, true)} /> {pt ? 'Travar posição' : 'Lock position'}</label>
+      <button title={pt ? 'Remove os itens selecionados do mapa (Del)' : 'Removes the selected items from the plot (Del)'} className="danger" onClick={() => { update(pr => { pr.items = pr.items.filter(i => !ids.includes(i.id)) }); select([]) }}>{pt ? `Remover ${sel.length} itens` : `Remove ${sel.length} items`}</button>
     </aside>
   )
 }
@@ -81,7 +81,7 @@ export function Props({ p }: { p: Project }) {
       <div className="panel-title">Design</div>
       {!it || !def ? null : (<>
         <h4>{def.label[p.lang]}</h4>
-        <label>{pt ? 'Rótulo / nome' : 'Label / name'}<input value={it.label} onChange={e => set({ label: e.target.value })} /></label>
+        <label title={pt ? 'Nome mostrado no mapa; se vazio, usa o nome do item. Também vira o nome do canal.' : 'Name shown on the plot; if empty, the item name is used. Also becomes the channel name.'}>{pt ? 'Rótulo / nome' : 'Label / name'}<input value={it.label} onChange={e => set({ label: e.target.value })} /></label>
         {def.params.length > 0 && <div className="parbox">
           {def.params.map(d => <ParamField key={d.key} d={d} value={P[d.key]} lang={p.lang} onChange={v => setParam(d.key, v)} />)}
         </div>}
@@ -89,16 +89,16 @@ export function Props({ p }: { p: Project }) {
           <label>{pt ? 'Músico (aparece na input list)' : 'Player (shown in input list)'}
             <MusicianInput p={p} value={it.who} placeholder={pt ? 'Escolha ou digite' : 'Pick or type'} onChange={v => set({ who: v })} />
           </label>)}
-        {it.board === 'light' && <label>DMX<input value={it.dmx} placeholder="1.001" onChange={e => set({ dmx: e.target.value })} /></label>}
+        {it.board === 'light' && <label title={pt ? 'Endereço DMX (universo.canal), usado no patch de luz' : 'DMX address (universe.channel), used in the light patch'}>DMX<input value={it.dmx} placeholder="1.001" onChange={e => set({ dmx: e.target.value })} /></label>}
         {chans.length > 0 && <div className="chhint"><b>{chans.length}</b> {pt ? (chans.length > 1 ? 'canais na input list' : 'canal na input list') : 'channel(s) in input list'}<small>{chans.map(c => c.ch).join(', ')}</small></div>}
         <div className="field">{pt ? 'Rotação (°)' : 'Rotation (°)'}
           <span className="slide"><input type="range" min={-180} max={180} step={5} value={normRot(it.rot)} onChange={e => set({ rot: +e.target.value })} /><NumInput min={-360} max={360} step={5} value={Math.round(normRot(it.rot))} onChange={v => set({ rot: v })} /></span></div>
         <div className="field">{pt ? 'Tamanho (×)' : 'Size (×)'}
           <span className="slide"><input type="range" min={0.4} max={3} step={0.1} value={Math.min(3, Math.max(0.4, it.scale))} onChange={e => set({ scale: +e.target.value })} /><NumInput min={0.1} max={10} step={0.1} value={+it.scale.toFixed(2)} onChange={v => set({ scale: v })} /></span></div>
-        <label>{pt ? 'Anotação' : 'Note'}<textarea rows={2} value={it.note} onChange={e => set({ note: e.target.value })} /></label>
-        <label className="chk"><input type="checkbox" checked={!it.hidden} onChange={e => set({ hidden: !e.target.checked }, true)} /> {pt ? 'Visível no mapa' : 'Visible on map'}</label>
-        <label className="chk"><input type="checkbox" checked={it.locked} onChange={e => set({ locked: e.target.checked }, true)} /> {pt ? 'Travar posição' : 'Lock position'}</label>
-        <button className="danger" onClick={() => { update(pr => { pr.items = pr.items.filter(i => i.id !== it.id) }); select([]) }}>{pt ? 'Remover' : 'Remove'}</button>
+        <label title={pt ? 'Observação do item: vai para a coluna de notas das listas' : 'Item remark: goes to the notes column of the lists'}>{pt ? 'Anotação' : 'Note'}<textarea rows={2} value={it.note} onChange={e => set({ note: e.target.value })} /></label>
+        <label title={pt ? 'Mostra ou oculta o item no mapa e nos PDFs' : 'Show or hide the item on the plot and in the PDFs'} className="chk"><input type="checkbox" checked={!it.hidden} onChange={e => set({ hidden: !e.target.checked }, true)} /> {pt ? 'Visível no mapa' : 'Visible on map'}</label>
+        <label title={pt ? 'Impede que o item seja movido por arrasto ou setas' : 'Prevents the item from being moved by drag or arrow keys'} className="chk"><input type="checkbox" checked={it.locked} onChange={e => set({ locked: e.target.checked }, true)} /> {pt ? 'Travar posição' : 'Lock position'}</label>
+        <button title={pt ? 'Remove o item do mapa (Del)' : 'Removes the item from the plot (Del)'} className="danger" onClick={() => { update(pr => { pr.items = pr.items.filter(i => i.id !== it.id) }); select([]) }}>{pt ? 'Remover' : 'Remove'}</button>
       </>)}
     </aside>
   )

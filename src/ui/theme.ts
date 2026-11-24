@@ -2,7 +2,7 @@ import { create } from 'zustand'
 
 export type Mode = 'light' | 'dark'
 export type Skin = 'figma' | 'apple'
-export const SKINS: { id: Skin; label: string }[] = [{ id: 'figma', label: 'Figma' }, { id: 'apple', label: 'Apple' }]
+export const SKINS: { id: Skin; label: string }[] = [{ id: 'figma', label: 'Default' }, { id: 'apple', label: 'Modern' }]
 const KEY = 'stageplot.theme', SKIN_KEY = 'stageplot.skin'
 const initial = (): Mode => {
   try { const v = localStorage.getItem(KEY); if (v === 'light' || v === 'dark') return v } catch { /* sem storage */ }

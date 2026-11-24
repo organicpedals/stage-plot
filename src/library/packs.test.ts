@@ -4,7 +4,7 @@ import { defaultParams, ICONS, useIconStyle } from './icons'
 const build = (id: string, over: Record<string, string | number | boolean> = {}) => { const d = ICONS.find(i => i.id === id)!; return d.build({ ...defaultParams(d), ...over }) }
 
 describe('pacote D (semi-realista, muda com a configuração)', () => {
-  beforeAll(() => useIconStyle.getState().setStyle('D'))
+  beforeAll(() => useIconStyle.setState({ style: 'D' }))
   it('ampli: 1x12 usa o mesmo gabinete do 2x12 (só menos falantes); 4x12 é maior; cabeçote aumenta a altura', () => {
     expect(build('guitar_amp', { speakers: '1' }).w).toBe(build('guitar_amp', { speakers: '2' }).w)
     expect(build('guitar_amp', { speakers: '1' }).svg).not.toBe(build('guitar_amp', { speakers: '2' }).svg)

@@ -52,23 +52,8 @@ const spk = (x: number, y: number, r: number) => ci(x, y, r, 0.08) + ring(x, y, 
 
 // ---------- estilo global dos ícones ----------
 export type IconStyle = 'S' | 'P' | 'F' | 'R' | 'D'
-export const ICON_STYLES: { id: IconStyle; label: { pt: string; en: string } }[] = [
-  { id: 'S', label: { pt: 'Planta detalhada', en: 'Detailed plan' } },
-  { id: 'P', label: { pt: 'Apple · SF Symbols', en: 'Apple · SF Symbols' } },
-  { id: 'F', label: { pt: 'Figma · Vetor', en: 'Figma · Vector' } },
-  { id: 'R', label: { pt: 'Realista · Silhueta', en: 'Realistic · Silhouette' } },
-  { id: 'D', label: { pt: 'Semi-realista · Contorno (muda com a config.)', en: 'Semi-realistic · Outline (follows config)' } },
-]
-const STYLE_KEY = 'stageplot.iconstyle'
-const loadStyle = (): IconStyle => {
-  try { const v = typeof localStorage !== 'undefined' ? localStorage.getItem(STYLE_KEY) : null; if (v && ICON_STYLES.some(x => x.id === v)) return v as IconStyle } catch { /* ignore */ }
-  return 'S'
-}
-/** Preferência global (vale para todos os projetos, palco, luz e exportações). */
-export const useIconStyle = create<{ style: IconStyle; setStyle: (s: IconStyle) => void }>(set => ({
-  style: loadStyle(),
-  setStyle: style => { try { localStorage.setItem(STYLE_KEY, style) } catch { /* ignore */ } set({ style }) },
-}))
+/** Estilo único: semi-realista (contorno, muda com a configuração). */
+export const useIconStyle = create<{ style: IconStyle }>(() => ({ style: 'D' }))
 const curStyle = () => useIconStyle.getState().style
 
 /** Pacotes de ícones sobre o mesmo desenho:
@@ -99,6 +84,7 @@ export function paint(svg: string, ink: string, accent: string, sw: number, styl
       })
       .replace(/<rect ([^>]*?)fill="\$A" stroke="none"\/>/g, '<rect $1fill="#FFFFFF" stroke="$A" stroke-width="$W(1.1)"/>')
   }
+  if (style === 'D' && pk) svg = svg.replace(/fill="none"/g, 'fill="$I" fill-opacity=".07"') // preenchimento cinza bem clarinho
   svg = svg.replace(/\$W\(([\d.]+)\)/g, (_m, k) => (sw / Number(k)).toFixed(3)).replace(/\$I/g, ink).replace(/\$A/g, accent)
   return wrap ? `<g ${wrap}>${svg}</g>` : svg
 }

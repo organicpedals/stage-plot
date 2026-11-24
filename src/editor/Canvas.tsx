@@ -1,6 +1,8 @@
 import { useCallback, useEffect, useLayoutEffect, useRef, useState } from 'react'
 import { autoK, itemLabel, itemShape, itemSize, mountMarks, MOUNT, THEMES } from '../export/boardSvg'
 import { ICON_MAP } from '../library/icons'
+import { ScaleField } from '../ui/ScaleField'
+import { useTheme } from '../ui/theme'
 import { itemName } from '../model/derive'
 import { cloneItem, newItem, useStore } from '../model/store'
 import type { Board, Project } from '../model/types'
@@ -27,7 +29,8 @@ export function Canvas({ p, board }: { p: Project; board: Board }) {
   const [marquee, setMarquee] = useState<{ x0: number; y0: number; x1: number; y1: number } | null>(null)
   const pan = useRef<{ x: number; y: number; tx: number; ty: number } | null>(null)
   const fitted = useRef(false)
-  const theme = THEMES.paper
+  const dark = useTheme(s => s.mode) === 'dark'
+  const theme = dark ? THEMES.dark : THEMES.paper
   const pt = p.lang === 'pt'
 
   const size = () => { const r = wrap.current!.getBoundingClientRect(); return { w: r.width, h: r.height } }
@@ -172,27 +175,24 @@ export function Canvas({ p, board }: { p: Project; board: Board }) {
   return (
     <div className="canvas-wrap">
       <div className="canvas-tools">
-        <label className="chk"><input type="checkbox" checked={snapOn} onChange={e => setSnapOn(e.target.checked)} /> {pt ? 'Grade' : 'Snap'}</label>
+        <label className="chk" title={pt ? 'Encaixa itens na grade ao arrastar (desligue para posicionar livremente)' : 'Snap items to the grid while dragging (turn off for free placement)'}><input type="checkbox" checked={snapOn} onChange={e => setSnapOn(e.target.checked)} /> {pt ? 'Alinhar à grade' : 'Snap to Grid'}</label>
         <span className="sep" />
-        <label className="inl" title={pt ? 'Tamanho global dos ícones' : 'Global icon size'}>{pt ? 'Ícones' : 'Icons'}
-          <input type="range" min={0.5} max={2} step={0.05} value={p.stage.k ?? 1} onChange={e => update(pr => { pr.stage.k = +e.target.value }, false)} />
-          <span className="mono">{Math.round((p.stage.k ?? 1) * 100)}%</span>
-        </label>
+        <ScaleField label={pt ? 'Ícones' : 'Icons'} value={p.stage.k ?? 1} onChange={v => update(pr => { pr.stage.k = v }, false)} title={pt ? 'Tamanho global dos ícones: digite, role o mouse ou clique para abrir o fader' : 'Global icon size: type, scroll the mouse wheel or click to open the fader'} />
         <span className="sep" />
         <span className="vis">
           <button onClick={() => setVisOpen(o => !o)} title={pt ? 'Mostrar/ocultar itens do mapa' : 'Show/hide map items'}>{pt ? 'Visibilidade' : 'Visibility'}{all.some(i => i.hidden) ? ` · ${all.filter(i => i.hidden).length} ${pt ? 'ocultos' : 'hidden'}` : ''}</button>
           {visOpen && <div className="vis-panel">
-            <div className="vis-head"><button onClick={() => setVis(all.map(i => i.id), false)}>{pt ? 'Mostrar todos' : 'Show all'}</button><button onClick={() => setVis(all.map(i => i.id), true)}>{pt ? 'Ocultar todos' : 'Hide all'}</button></div>
-            <label className="chk"><input type="checkbox" checked={showHidden} onChange={e => setShowHidden(e.target.checked)} /> {pt ? 'Ver ocultos esmaecidos no editor' : 'Show hidden dimmed in editor'}</label>
+            <div className="vis-head"><button title={pt ? 'Mostra todos os itens' : 'Shows all items'} onClick={() => setVis(all.map(i => i.id), false)}>{pt ? 'Mostrar todos' : 'Show all'}</button><button title={pt ? 'Oculta todos os itens' : 'Hides all items'} onClick={() => setVis(all.map(i => i.id), true)}>{pt ? 'Ocultar todos' : 'Hide all'}</button></div>
+            <label title={pt ? 'Itens ocultos aparecem esmaecidos só no editor (não vão ao PDF)' : 'Hidden items appear dimmed in the editor only (not in the PDF)'} className="chk"><input type="checkbox" checked={showHidden} onChange={e => setShowHidden(e.target.checked)} /> {pt ? 'Ver ocultos esmaecidos no editor' : 'Show hidden dimmed in editor'}</label>
             {all.length === 0 && <p className="muted">{pt ? 'Nenhum item.' : 'No items.'}</p>}
             {all.map(i => <label key={i.id} className="chk vis-row"><input type="checkbox" checked={!i.hidden} onChange={e => setVis([i.id], !e.target.checked)} /> <span>{itemName(i, p.lang) || i.kind}</span></label>)}
           </div>}
         </span>
         {board === 'light' && <span className="hint">{(['aereo', 'chao'] as const).map(k => <span key={k} style={{ marginRight: 10 }}><i style={{ display: 'inline-block', width: 9, height: 9, borderRadius: 5, background: MOUNT[k].color, marginRight: 4 }} />{pt ? MOUNT[k].pt : MOUNT[k].en}</span>)}</span>}
         <span className="sp" />
-        <button onClick={() => zoomBy(0.8)}>−</button>
+        <button title={pt ? 'Afasta o zoom' : 'Zoom out'} onClick={() => zoomBy(0.8)}>−</button>
         <button className="mono zbtn" onClick={() => zoomTo(100)} title="Ctrl+1">{Math.round(z)}%</button>
-        <button onClick={() => zoomBy(1.25)}>+</button>
+        <button title={pt ? 'Aproxima o zoom' : 'Zoom in'} onClick={() => zoomBy(1.25)}>+</button>
         <button onClick={() => fit()} title="Ctrl+0">{pt ? 'Ajustar' : 'Fit'}</button>
       </div>
       <div ref={wrap} className="viewport" style={{ cursor }} onPointerDownCapture={onDownCapture} onPointerMove={onMove} onPointerUp={onUp} onPointerCancel={onUp}

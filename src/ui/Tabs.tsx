@@ -83,9 +83,9 @@ export function InputsTab({ p }: { p: Project }) {
           </tr>))}
         </tbody></table></div>
       <div className="actions">
-        <button onClick={addManual}>+ {pt ? 'Canal manual' : 'Manual channel'}</button>
-        {p.chan.hidden.length > 0 && <button className="ghost" onClick={() => update(pr => { pr.chan.hidden = [] })}>{pt ? `Restaurar ${p.chan.hidden.length} removido(s)` : `Restore ${p.chan.hidden.length} removed`}</button>}
-        {Object.keys(p.chan.ov).length > 0 && <button className="ghost" onClick={() => update(pr => { pr.chan.ov = {} })}>{pt ? 'Descartar todas as edições' : 'Discard all edits'}</button>}
+        <button title={pt ? 'Adiciona um canal que não vem de nenhum item do palco' : 'Adds a channel that does not come from any stage item'} onClick={addManual}>+ {pt ? 'Canal manual' : 'Manual channel'}</button>
+        {p.chan.hidden.length > 0 && <button title={pt ? 'Traz de volta os canais removidos da lista' : 'Brings back the channels removed from the list'} className="ghost" onClick={() => update(pr => { pr.chan.hidden = [] })}>{pt ? `Restaurar ${p.chan.hidden.length} removido(s)` : `Restore ${p.chan.hidden.length} removed`}</button>}
+        {Object.keys(p.chan.ov).length > 0 && <button title={pt ? 'Desfaz todas as edições manuais e volta ao gerado pelo mapa' : 'Undoes all manual edits and returns to what the plot generates'} className="ghost" onClick={() => update(pr => { pr.chan.ov = {} })}>{pt ? 'Descartar todas as edições' : 'Discard all edits'}</button>}
       </div>
 
       <h2>{pt ? 'Saídas de monitor' : 'Monitor outputs'}</h2>
@@ -127,15 +127,15 @@ export function RiderTab({ p }: { p: Project }) {
       {p.sections.map((s, i) => (
         <div key={s.id} className="sec">
           <div className="sec-head">
-            <input className="sec-title" value={s.title} onChange={e => update(pr => { pr.sections[i].title = e.target.value }, false)} />
-            <label className="chk"><input type="checkbox" checked={s.enabled} onChange={e => update(pr => { pr.sections[i].enabled = e.target.checked })} />{pt ? 'Incluir' : 'Include'}</label>
+            <input title={pt ? 'Título da seção no PDF' : 'Section title in the PDF'} className="sec-title" value={s.title} onChange={e => update(pr => { pr.sections[i].title = e.target.value }, false)} />
+            <label title={pt ? 'Inclui ou tira esta seção do PDF' : 'Includes or removes this section from the PDF'} className="chk"><input type="checkbox" checked={s.enabled} onChange={e => update(pr => { pr.sections[i].enabled = e.target.checked })} />{pt ? 'Incluir' : 'Include'}</label>
             <button className="ghost" disabled={i === 0} onClick={() => update(pr => { const [x] = pr.sections.splice(i, 1); pr.sections.splice(i - 1, 0, x) })}>↑</button>
-            <button className="ghost" onClick={() => update(pr => { pr.sections.splice(i, 1) })}>✕</button>
+            <button title={pt ? 'Exclui a seção' : 'Deletes the section'} className="ghost" onClick={() => update(pr => { pr.sections.splice(i, 1) })}>✕</button>
           </div>
           <textarea rows={4} value={s.body} onChange={e => update(pr => { pr.sections[i].body = e.target.value }, false)} />
         </div>
       ))}
-      <button onClick={() => update(pr => { pr.sections.push({ id: uid(), title: pt ? 'Nova seção' : 'New section', body: '', required: false, enabled: true }) })}>+ {pt ? 'Seção' : 'Section'}</button>
+      <button title={pt ? 'Adiciona uma seção de texto ao rider' : 'Adds a text section to the rider'} onClick={() => update(pr => { pr.sections.push({ id: uid(), title: pt ? 'Nova seção' : 'New section', body: '', required: false, enabled: true }) })}>+ {pt ? 'Seção' : 'Section'}</button>
     </div>
   )
 }
@@ -156,16 +156,16 @@ export function InfoTab({ p }: { p: Project }) {
       </div>
       <h3>{pt ? 'Cor de destaque dos PDFs' : 'PDF accent color'}</h3>
       <div className="accent-row">
-        <input type="color" aria-label={pt ? 'Cor de destaque' : 'Accent color'} value={/^#[0-9a-f]{6}$/i.test(p.pdfAccent ?? '') ? p.pdfAccent! : '#6F6620'} onChange={e => update(pr => { pr.pdfAccent = e.target.value.toUpperCase() }, false)} />
+        <input title={pt ? 'Cor de destaque usada em números, títulos e réguas do PDF' : 'Accent color used for numbers, headings and rules in the PDF'} type="color" aria-label={pt ? 'Cor de destaque' : 'Accent color'} value={/^#[0-9a-f]{6}$/i.test(p.pdfAccent ?? '') ? p.pdfAccent! : '#6F6620'} onChange={e => update(pr => { pr.pdfAccent = e.target.value.toUpperCase() }, false)} />
         {['#6F6620', '#C2410C', '#B91C1C', '#0F766E', '#1D4ED8', '#7E22CE', '#BE185D'].map(c => <button key={c} type="button" className="swatch" title={c} style={{ background: c, outline: (p.pdfAccent ?? '').toUpperCase() === c ? '2px solid var(--fg)' : 'none' }} onClick={() => update(pr => { pr.pdfAccent = c })} />)}
-        {p.pdfAccent && <button className="ghost" onClick={() => update(pr => { delete pr.pdfAccent })}>{pt ? 'Padrão do modelo' : 'Model default'}</button>}
+        {p.pdfAccent && <button title={pt ? 'Volta à cor original do modelo de PDF' : 'Back to the PDF model original color'} className="ghost" onClick={() => update(pr => { delete pr.pdfAccent })}>{pt ? 'Padrão do modelo' : 'Model default'}</button>}
       </div>
       <h3>{pt ? 'Foto da capa' : 'Cover photo'}</h3>
       <div className="photo">
         {p.press.photo ? <img src={p.press.photo} alt="" /> : <div className="ph">{pt ? 'Foto da capa' : 'Cover photo'}</div>}
         <div>
-          <label className="btn">{p.press.photo ? (pt ? 'Trocar foto' : 'Change photo') : (pt ? 'Escolher foto' : 'Choose photo')}<input type="file" accept="image/*" hidden onChange={pick(d => update(pr => { pr.press.photo = d }))} /></label>
-          {p.press.photo && <button className="ghost" onClick={() => update(pr => { pr.press.photo = '' })}>{pt ? 'Remover' : 'Remove'}</button>}
+          <label title={pt ? 'Foto da capa do PDF (vertical ou quadrada, boa resolução)' : 'PDF cover photo (portrait or square, good resolution)'} className="btn">{p.press.photo ? (pt ? 'Trocar foto' : 'Change photo') : (pt ? 'Escolher foto' : 'Choose photo')}<input type="file" accept="image/*" hidden onChange={pick(d => update(pr => { pr.press.photo = d }))} /></label>
+          {p.press.photo && <button title={pt ? 'Remove a foto da capa' : 'Removes the cover photo'} className="ghost" onClick={() => update(pr => { pr.press.photo = '' })}>{pt ? 'Remover' : 'Remove'}</button>}
         </div>
       </div>
       <h3>{pt ? 'Coordenador técnico' : 'Technical coordinator'}</h3>
@@ -177,10 +177,10 @@ export function InfoTab({ p }: { p: Project }) {
         <div key={m.id} className="row2">
           <input placeholder={pt ? 'Nome' : 'Name'} value={m.name} onChange={e => update(pr => { const old = pr.members[i].name, nv = e.target.value; pr.members[i].name = nv; if (old) for (const it of pr.items) if (it.who === old) it.who = nv }, false)} />
           <input placeholder={pt ? 'Função' : 'Role'} value={m.role} onChange={e => update(pr => { pr.members[i].role = e.target.value }, false)} />
-          <button className="ghost" onClick={() => update(pr => { pr.members.splice(i, 1) })}>✕</button>
+          <button title={pt ? 'Remove o integrante' : 'Removes the member'} className="ghost" onClick={() => update(pr => { pr.members.splice(i, 1) })}>✕</button>
         </div>
       ))}
-      <button onClick={() => update(pr => { pr.members.push({ id: uid(), name: '', role: '' }) })}>+ {pt ? 'Integrante' : 'Member'}</button>
+      <button title={pt ? 'Adiciona um integrante: o nome aparece como opção de Músico na input list' : 'Adds a member: the name becomes an option in the input list Player field'} onClick={() => update(pr => { pr.members.push({ id: uid(), name: '', role: '' }) })}>+ {pt ? 'Integrante' : 'Member'}</button>
     </div>
   )
 }

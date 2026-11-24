@@ -31,7 +31,7 @@ export function Palette({ p, board }: { p: Project; board: Board }) {
     <aside className="palette">
       <div className="panel-title pal-head">{p.lang === 'pt' ? 'Biblioteca' : 'Library'}</div>
       <div className="pal-search">
-        <input type="search" value={q} onChange={e => setQ(e.target.value)} placeholder={p.lang === 'pt' ? 'Buscar item…' : 'Search items…'} />
+        <input title={p.lang === 'pt' ? 'Filtra a biblioteca pelo nome do item' : 'Filters the library by item name'} type="search" value={q} onChange={e => setQ(e.target.value)} placeholder={p.lang === 'pt' ? 'Buscar item…' : 'Search items…'} />
       </div>
       {!list.length && <div className="pal-empty">{p.lang === 'pt' ? 'Nenhum item encontrado' : 'No items found'}</div>}
       {cats.map(c => (

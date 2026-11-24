@@ -1,5 +1,5 @@
 import { useEffect, useState } from 'react'
-import { ICON_STYLES, useIconStyle } from '../library/icons'
+import { useIconStyle } from '../library/icons'
 import { Canvas } from '../editor/Canvas'
 import { autoK } from '../export/boardSvg'
 import { cloneItem, copyItems, newProject, normalize, pasteItems, useStore } from '../model/store'
@@ -23,19 +23,9 @@ function ThemeToggle({ lang }: { lang: 'pt' | 'en' }) {
 function SkinSelect({ lang }: { lang: 'pt' | 'en' }) {
   const { skin, setSkin } = useTheme()
   return (
-    <label className="iconstyle" title={lang === 'pt' ? 'Estilo da interface' : 'Interface style'}>
-      {lang === 'pt' ? 'Interface' : 'UI'}
+    <label className="iconstyle" title={lang === 'pt' ? 'Skin: aparência da interface (Default ou Modern)' : 'Skin: interface look (Default or Modern)'}>
+      Skin
       <select value={skin} onChange={e => setSkin(e.target.value as Skin)}>{SKINS.map(s => <option key={s.id} value={s.id}>{s.label}</option>)}</select>
-    </label>
-  )
-}
-
-function IconStyleSelect({ lang }: { lang: 'pt' | 'en' }) {
-  const { style, setStyle } = useIconStyle()
-  return (
-    <label className="iconstyle" title={lang === 'pt' ? 'Estilo dos ícones (global)' : 'Icon style (global)'}>
-      {lang === 'pt' ? 'Ícones' : 'Icons'}
-      <select value={style} onChange={e => setStyle(e.target.value as typeof style)}>{ICON_STYLES.map(s => <option key={s.id} value={s.id}>{s.label[lang]}</option>)}</select>
     </label>
   )
 }
@@ -52,18 +42,18 @@ function Home() {
   }
   return (
     <div className="home">
-      <header className="brand"><span className="logo" />Stage Plot<span className="sp" /><SkinSelect lang="pt" /><ThemeToggle lang="pt" /><IconStyleSelect lang="pt" /></header>
+      <header className="brand"><span className="logo" />Stage Plot<span className="sp" /><SkinSelect lang="pt" /><ThemeToggle lang="pt" /></header>
       <div className="grid">
-        <button className="card new" onClick={() => addProject(newProject('Nova banda'))}><b>+</b> Novo projeto</button>
-        <label className="card new"><b>↥</b> Importar projetos (.json)<input type="file" accept=".json,application/json" multiple hidden onChange={fileIn} /></label>
-        {projects.length > 0 && <button className="card new" onClick={() => exportAllJson(projects)}><b>↧</b> Exportar todos (backup)</button>}
+        <button title="Cria um projeto novo com o palco vazio" className="card new" onClick={() => addProject(newProject('Nova banda'))}><b>+</b> Novo projeto</button>
+        <label title="Importa projetos salvos (.json) para esta lista" className="card new"><b>↥</b> Importar projetos (.json)<input type="file" accept=".json,application/json" multiple hidden onChange={fileIn} /></label>
+        {projects.length > 0 && <button title="Baixa um backup com todos os projetos em um único arquivo .json" className="card new" onClick={() => exportAllJson(projects)}><b>↧</b> Exportar todos (backup)</button>}
         {projects.map(p => (
           <div key={p.id} className="card" role="button" tabIndex={0} onClick={() => setCurrent(p.id)} onKeyDown={e => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); setCurrent(p.id) } }}>
             <h3>{p.band.name || p.name}</h3>
             <p>{p.items.filter(i => i.board === 'stage').length} itens · {p.version}</p>
             <p className="muted">Atualizado em {p.updated}</p>
-            <button className="ghost" onClick={e => { e.stopPropagation(); exportJson(p) }}>Exportar</button>
-            <button className="ghost" onClick={e => { e.stopPropagation(); if (confirm('Excluir este projeto?')) removeProject(p.id) }}>Excluir</button>
+            <button title="Baixa só este projeto em .json" className="ghost" onClick={e => { e.stopPropagation(); exportJson(p) }}>Exportar</button>
+            <button title="Exclui o projeto (pede confirmação)" className="ghost" onClick={e => { e.stopPropagation(); if (confirm('Excluir este projeto?')) removeProject(p.id) }}>Excluir</button>
           </div>
         ))}
       </div>
@@ -76,6 +66,14 @@ function Editor({ p }: { p: Project }) {
   const [tab, setTab] = useState<Tab>('stage')
   useIconStyle() // re-renderiza mapa e biblioteca ao trocar o estilo
   const pt = p.lang === 'pt'
+  const TAB_TIPS: Record<Tab, [string, string]> = {
+    stage: ['Mapa de palco: posicione instrumentos, retornos e equipamentos de áudio', 'Stage plot: place instruments, monitors and audio gear'],
+    light: ['Mapa de luz: posicione refletores, móveis e estruturas', 'Light plot: place fixtures, movers and rigging'],
+    inputs: ['Input list, saídas e energia: gerados a partir do mapa e editáveis', 'Input list, outputs and power: generated from the plot and editable'],
+    rider: ['Textos do rider técnico que entram no PDF', 'Technical rider text sections included in the PDF'],
+    info: ['Dados da banda, foto, cor e integrantes (capa do PDF)', 'Band details, photo, color and members (PDF cover)'],
+    export: ['Gera o PDF completo, SVG, PNG ou salva o projeto', 'Export the full PDF, SVG, PNG or save the project'],
+  }
   const tabs: [Tab, string][] = [['stage', pt ? 'Palco' : 'Stage'], ['light', pt ? 'Luz' : 'Light'], ['inputs', 'Input list'], ['rider', 'Rider'], ['info', pt ? 'Informações' : 'Info'], ['export', pt ? 'Exportar' : 'Export']]
 
   useEffect(() => { if (tab === 'stage' || tab === 'light') setBoard(tab) }, [tab, setBoard])
@@ -105,16 +103,16 @@ function Editor({ p }: { p: Project }) {
   return (
     <div className="editor">
       <header className="top">
-        <button className="ghost" onClick={() => setCurrent(null)}>← {pt ? 'Projetos' : 'Projects'}</button>
-        <input className="title" value={p.band.name || p.name} onChange={e => update(pr => { pr.band.name = e.target.value; pr.name = e.target.value }, false)} />
-        <nav className="tabs">{tabs.map(([k, l]) => <button key={k} className={tab === k ? 'on' : ''} onClick={() => setTab(k)}>{l}</button>)}</nav>
+        <button title={pt ? 'Volta à lista de projetos. Tudo é salvo automaticamente.' : 'Back to the project list. Everything is saved automatically.'} className="ghost" onClick={() => setCurrent(null)}>← {pt ? 'Projetos' : 'Projects'}</button>
+        <input title={pt ? 'Nome da banda: aparece na capa e nos PDFs' : 'Band name: shown on the cover and in the PDFs'} className="title" value={p.band.name || p.name} onChange={e => update(pr => { pr.band.name = e.target.value; pr.name = e.target.value }, false)} />
+        <nav className="tabs">{tabs.map(([k, l]) => <button key={k} className={tab === k ? 'on' : ''} title={TAB_TIPS[k][pt ? 0 : 1]} onClick={() => setTab(k)}>{l}</button>)}</nav>
         <span className="sp" />
         <button className="ghost" disabled={!past.length} onClick={undo} title="Ctrl+Z">↶</button>
         <button className="ghost" disabled={!future.length} onClick={redo} title="Ctrl+Y">↷</button>
         <SkinSelect lang={p.lang} />
         <ThemeToggle lang={p.lang} />
-        <IconStyleSelect lang={p.lang} />
-        <select value={p.lang} onChange={e => update(pr => { pr.lang = e.target.value as 'pt' | 'en' })}><option value="pt">PT</option><option value="en">EN</option></select>
+        
+        <select title={pt ? 'Idioma do projeto e dos documentos exportados' : 'Project and exported documents language'} value={p.lang} onChange={e => update(pr => { pr.lang = e.target.value as 'pt' | 'en' })}><option value="pt">PT</option><option value="en">EN</option></select>
       </header>
       <main className={tab === 'stage' || tab === 'light' ? 'work' : 'page'}>
         {(tab === 'stage' || tab === 'light') && (<>
