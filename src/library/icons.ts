@@ -1,5 +1,6 @@
 import { create } from 'zustand'
 import type { Board, Item, Lang } from '../model/types'
+import { PACKS, packSvg } from './packs'
 
 /* Estilo "contorno suave", minimalista: vista de cima, poucas peças que aludem ao objeto,
    preenchimento translúcido e um ponto de destaque (ciano no áudio, âmbar na luz).
@@ -74,15 +75,16 @@ const curStyle = () => useIconStyle.getState().style
  *    âncoras de vetor (quadradinho branco com contorno colorido). */
 export function paint(svg: string, ink: string, accent: string, sw: number, style: IconStyle = curStyle()): string {
   let wrap = ''
+  const pk = svg.includes('data-pk') // glifo dos pacotes: já desenhado no estilo certo, só resolve os tokens
   if (style === 'P') {
-    sw *= 1.25; wrap = 'stroke-linecap="round" stroke-linejoin="round"'
-    svg = svg
+    sw *= pk ? 1.2 : 1.25; wrap = 'stroke-linecap="round" stroke-linejoin="round"'
+    if (!pk) svg = svg
       .replace(/fill="\$I" fill-opacity="([\d.]+)"/g, (_m, o) => `fill="$I" fill-opacity="${Math.min(0.24, Number(o) * 1.6 + 0.04).toFixed(2)}"`)
       .replace(/(?<!-)opacity="0?\.[67]"/g, 'opacity="1"')
       .replace(/rx="([\d.]+)"/g, (_m, r) => `rx="${(Number(r) * 1.7).toFixed(2)}"`)
   } else if (style === 'F') {
-    sw *= 0.8; wrap = 'stroke-linecap="butt" stroke-linejoin="miter"'
-    svg = svg
+    sw *= pk ? 1 : 0.8; wrap = 'stroke-linecap="butt" stroke-linejoin="miter"'
+    if (!pk) svg = svg
       .replace(/fill="\$I" fill-opacity="[\d.]+"/g, 'fill="none"')
       .replace(/(?<!-)opacity="0?\.[67]"/g, 'opacity="1"')
       .replace(/rx="([\d.]+)"/g, (_m, r) => `rx="${Math.min(1.5, Number(r) * 0.4).toFixed(2)}"`)
@@ -557,20 +559,22 @@ const SGEOM: Record<string, [number, number, number, number, string]> = {
   blinder: [0, 0, 100, 62, rr(0, 0, 100, 62, 6, 0.12) + ci(28, 31, 20, 0.1) + dr(28, 31, 12) + dotA(28, 31, 5) + ci(72, 31, 20, 0.1) + dr(72, 31, 12) + dotA(72, 31, 5)],
   mirrorball: [0, 0, 100, 100, L(50, 0, 50, 24) + rr(42, 20, 16, 8, 2, 0.2) + ci(50, 64, 34, 0.12) + dr(50, 64, 22) + dl(16, 64, 84, 64) + dl(50, 30, 50, 98) + dotA(38, 52, 4)],
 }
-/** Todos os pacotes usam a geometria da planta detalhada (SGEOM), quando existe; P e F só mudam o traço (ver paint). */
-const withLegacy = (d: IconDef): IconDef => {
-  if (!LEG[d.id] && !SGEOM[d.id]) return d
-  return {
-    ...d,
-    build: P => {
-      const b = d.build(P)
-      const g = SGEOM[d.id] ?? LEG[d.id]; if (!g) return b
-      const [bx, by, bw, bh, art] = g
-      const s = Math.max(b.w, b.h) / Math.max(bw, bh)
-      return { w: bw * s, h: bh * s, svg: `<g transform="scale(${s.toFixed(4)}) translate(${-bx} ${-by})" stroke-width="$W(${s.toFixed(4)})">${art}</g>` }
-    },
-  }
-}
+/** "Planta detalhada" usa SGEOM (ou LEG); os pacotes P (Apple) e F (Figma) usam glifos próprios (packs.ts) na MESMA pegada do item. */
+const withLegacy = (d: IconDef): IconDef => ({
+  ...d,
+  build: P => {
+    const b = d.build(P), g = SGEOM[d.id] ?? LEG[d.id]
+    let w = b.w, h = b.h, svg = b.svg
+    if (g) {
+      const [bx, by, bw, bh, art] = g, s = Math.max(b.w, b.h) / Math.max(bw, bh)
+      w = bw * s; h = bh * s
+      svg = `<g transform="scale(${s.toFixed(4)}) translate(${-bx} ${-by})" stroke-width="$W(${s.toFixed(4)})">${art}</g>`
+    }
+    const st = curStyle()
+    if (st !== 'S') { const pk = PACKS[st][d.id]; if (pk) return { w, h, svg: packSvg(pk, w, h) } }
+    return { w, h, svg }
+  },
+})
 
 export const ICONS: IconDef[] = [
   drums, edrums, perc, pads, keys, organ, piano, accordion, guitarAmp, bassAmp, ampAc, multifx, pedalboard, acoustic, horn, strings, dj, laptop, vocal, backing, choir, talkback, stool, chair, musicStand, stand, fan, rug,
