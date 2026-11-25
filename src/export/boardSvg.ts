@@ -101,10 +101,11 @@ export function boardSvg(p: Project, board: Board, o: BoardOpts): { svg: string;
   const legW = used.length ? (0.45 + Math.max(...used.map(k => mLabel(k).length)) * 0.13) * K : 0
   eR += legW
   const W = sw + m * 2 + eL + eR
-  const H = sd + m * 2 + 0.7 * K + legH + eT + eB
+  const topT = o.title ? 0.5 * K : 0, botT = o.showScale !== false ? 0.7 * K : 0.45 * K // sem título/escala: só o espaço do rótulo PLATEIA
+  const H = sd + m * 2 + topT + botT + legH + eT + eB
   const parts: string[] = []
   parts.push(`<rect x="0" y="0" width="${W}" height="${H}" fill="${theme.bg}"/>`)
-  parts.push(`<g transform="translate(${m + eL} ${m + 0.5 * K + eT})">`)
+  parts.push(`<g transform="translate(${m + eL} ${m + topT + eT})">`)
   parts.push(`<rect x="0" y="0" width="${sw}" height="${sd}" fill="${theme.stage}" stroke="${theme.fg}" stroke-width="${0.04 * K}"/>`)
   if (o.showGrid !== false) {
     for (let x = 1; x < sw; x++) parts.push(`<line x1="${x}" y1="0" x2="${x}" y2="${sd}" stroke="${theme.grid}" stroke-width="${0.012 * K}"/>`)

@@ -16,12 +16,12 @@ const slug = (s: string) => (s || 'banda').normalize('NFD').replace(/[̀-ͯ]/g, 
 export type Look = 'paper' | 'dark' | 'mono'
 
 export function exportSvg(p: Project, board: Board, look: Look) {
-  const { svg } = boardSvg(p, board, { theme: THEMES[look], showLegend: true, title: `${p.band.name || p.name} - ${board === 'stage' ? 'Stage plot' : 'Light plot'}` })
+  const { svg } = boardSvg(p, board, { theme: THEMES[look], showLegend: false, showScale: false })
   download(new Blob([svg], { type: 'image/svg+xml' }), `${slug(p.band.name || p.name)}-${board}-${p.version}.svg`)
 }
 
 export async function exportPng(p: Project, board: Board, look: Look, width = 2400) {
-  const { svg, w, h } = boardSvg(p, board, { theme: THEMES[look], showLegend: true, width, title: `${p.band.name || p.name} - ${board === 'stage' ? 'Stage plot' : 'Light plot'}` })
+  const { svg, w, h } = boardSvg(p, board, { theme: THEMES[look], showLegend: false, showScale: false, width })
   const img = new Image()
   const url = URL.createObjectURL(new Blob([svg], { type: 'image/svg+xml' }))
   await new Promise<void>((res, rej) => { img.onload = () => res(); img.onerror = () => rej(new Error('svg')); img.src = url })
