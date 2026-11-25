@@ -7,11 +7,17 @@ import type { Project } from '../model/types'
 
 type Kind = 'pdf' | 'png' | 'svg' | 'project'
 
-const KINDS: { id: Kind; icon: string; label: [string, string]; tip: [string, string] }[] = [
-  { id: 'pdf', icon: 'PDF', label: ['PDF', 'PDF'], tip: ['Documento completo: capa, rider, mapas, input list e energia', 'Full document: cover, rider, plots, input list and power'] },
-  { id: 'png', icon: 'PNG', label: ['Imagem', 'Image'], tip: ['Só o mapa, em imagem PNG', 'Just the plot, as a PNG image'] },
-  { id: 'svg', icon: 'SVG', label: ['SVG', 'SVG'], tip: ['Só o mapa, em vetor editável (Illustrator, Figma)', 'Just the plot, as editable vector (Illustrator, Figma)'] },
-  { id: 'project', icon: '▣', label: ['Projeto', 'Project'], tip: ['Arquivo .stageplot: backup ou para abrir em outro computador', '.stageplot file: backup, or to open on another computer'] },
+const ICONS: Record<Kind, JSX.Element> = {
+  pdf: <><path d="M7 3h7l4 4v14H7z" /><path d="M14 3v4h4" /><path d="M9.5 12h5M9.5 15h5M9.5 18h3" /></>,
+  png: <><rect x="4" y="5" width="16" height="14" rx="2" /><circle cx="9" cy="10" r="1.6" /><path d="M4.5 17l4.5-4.5 3.5 3.5 2.5-2.5 4.5 4.5" /></>,
+  svg: <><path d="M5 18C7 8 13 6 19 6" /><rect x="3.5" y="16.5" width="3" height="3" /><rect x="17.5" y="4.5" width="3" height="3" /><path d="M12 6V3M12 6l2-1.5" /></>,
+  project: <><path d="M12 3l8 4v10l-8 4-8-4V7z" /><path d="M4 7l8 4 8-4M12 11v10" /></>,
+}
+const KINDS: { id: Kind; ext: string; label: [string, string]; tip: [string, string] }[] = [
+  { id: 'pdf', ext: '.pdf', label: ['PDF', 'PDF'], tip: ['Documento completo: capa, rider, mapas, input list e energia', 'Full document: cover, rider, plots, input list and power'] },
+  { id: 'png', ext: '.png', label: ['Imagem', 'Image'], tip: ['Só o mapa, em imagem PNG', 'Just the plot, as a PNG image'] },
+  { id: 'svg', ext: '.svg', label: ['SVG', 'SVG'], tip: ['Só o mapa, em vetor editável (Illustrator, Figma)', 'Just the plot, as editable vector (Illustrator, Figma)'] },
+  { id: 'project', ext: '.stageplot', label: ['Projeto', 'Project'], tip: ['Arquivo .stageplot: backup ou para abrir em outro computador', '.stageplot file: backup, or to open on another computer'] },
 ]
 
 export function ExportTab({ p }: { p: Project }) {
@@ -51,8 +57,9 @@ export function ExportTab({ p }: { p: Project }) {
     <div className="export">
       <div className="exp-grid" role="radiogroup" aria-label={pt ? 'Formato de exportação' : 'Export format'}>
         {KINDS.map(k => (
-          <button key={k.id} role="radio" aria-checked={kind === k.id} title={k.tip[pt ? 0 : 1]} className={'card exp' + (kind === k.id ? ' on' : '')} onClick={() => pick(k.id)}>
-            <b className="exp-icon">{k.icon}</b>{k.label[pt ? 0 : 1]}
+          <button key={k.id} role="radio" aria-checked={kind === k.id} title={k.tip[pt ? 0 : 1]} className={'card exp exp-' + k.id + (kind === k.id ? ' on' : '')} onClick={() => pick(k.id)}>
+            <span className="exp-ico" aria-hidden="true"><svg viewBox="0 0 24 24" fill="none" stroke="currentColor" strokeWidth="1.6" strokeLinecap="round" strokeLinejoin="round">{ICONS[k.id]}</svg></span>
+            <span className="exp-txt"><b>{k.label[pt ? 0 : 1]}</b><small>{k.ext}</small></span>
           </button>
         ))}
       </div>

@@ -60,10 +60,31 @@ input[type=range]::-moz-range-thumb { width: 14px; height: 14px; border-radius: 
 
 /* aba Exportar: escolha do formato em cards (como a tela de projetos) */
 .export { display: flex; flex-direction: column; height: 100%; overflow: auto }
-.exp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(150px, 1fr)); gap: 14px; padding: 18px }
-.card.exp { display: flex; flex-direction: column; align-items: center; justify-content: center; gap: 8px; min-height: 96px; font-size: 14px; font-weight: 600; color: var(--fg); text-align: center }
-.card.exp .exp-icon { color: var(--amber); font-size: 18px; letter-spacing: .04em }
-.card.exp.on { border-color: var(--amber); box-shadow: 0 0 0 1px var(--amber) }
+.exp-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(180px, 1fr)); gap: 12px; padding: 18px }
+.card.exp { display: flex; flex-direction: row; align-items: center; justify-content: flex-start; gap: 12px; min-height: 0; text-align: left; color: var(--fg); font-family: inherit }
+.card.exp .exp-ico { display: grid; place-items: center; flex: none }
+.card.exp .exp-ico svg { width: 20px; height: 20px }
+.card.exp .exp-txt { display: flex; flex-direction: column; gap: 1px; min-width: 0 }
+.card.exp .exp-txt b { font-weight: 600; font-size: 13px }
+.card.exp .exp-txt small { color: var(--muted); font-size: 11px; font-family: 'IBM Plex Mono', ui-monospace, monospace }
+/* Default (Figma): denso, reto, ícone de traço, seleção com borda azul de 2px */
+[data-skin='figma'] .card.exp { padding: 10px 12px; border-radius: 6px; border: 1px solid var(--line2); background: var(--panel); box-shadow: none }
+[data-skin='figma'] .card.exp .exp-ico { width: 28px; height: 28px; border-radius: 4px; border: 1px solid var(--line2); color: var(--muted) }
+[data-skin='figma'] .card.exp:hover { border-color: var(--muted); background: var(--hover) }
+[data-skin='figma'] .card.exp.on { border-color: var(--amber); box-shadow: inset 0 0 0 1px var(--amber); background: var(--selbg) }
+[data-skin='figma'] .card.exp.on .exp-ico { color: var(--amber); border-color: var(--amber) }
+[data-skin='figma'] .card.exp.on .exp-txt b { color: var(--selfg) }
+/* Modern (Apple): ícone em tile arredondado colorido, cantos grandes, sombra suave */
+[data-skin='apple'] .card.exp { padding: 14px 16px; border-radius: 16px; border: .5px solid var(--line2); background: var(--panel); box-shadow: 0 1px 2px #0000000d, 0 4px 14px #00000010; transition: transform .12s, box-shadow .12s }
+[data-skin='apple'] .card.exp:hover { transform: translateY(-1px); box-shadow: 0 2px 4px #0000000f, 0 8px 22px #00000018 }
+[data-skin='apple'] .card.exp .exp-ico { width: 40px; height: 40px; border-radius: 10px; color: #fff; box-shadow: inset 0 0 0 .5px #ffffff40, 0 1px 2px #00000030 }
+[data-skin='apple'] .card.exp .exp-ico svg { width: 22px; height: 22px }
+[data-skin='apple'] .card.exp-pdf .exp-ico { background: linear-gradient(#ff6a5f, #ff3b30) }
+[data-skin='apple'] .card.exp-png .exp-ico { background: linear-gradient(#5fd97a, #30b94d) }
+[data-skin='apple'] .card.exp-svg .exp-ico { background: linear-gradient(#ffb340, #ff9500) }
+[data-skin='apple'] .card.exp-project .exp-ico { background: linear-gradient(#4da3ff, #0a84ff) }
+[data-skin='apple'] .card.exp .exp-txt b { font-size: 14px }
+[data-skin='apple'] .card.exp.on { border-color: var(--amber); border-width: 1.5px; background: color-mix(in srgb, var(--amber) 9%, var(--panel)); box-shadow: 0 0 0 3px color-mix(in srgb, var(--amber) 25%, transparent) }
 .exp-body { display: grid; grid-template-columns: minmax(0, 480px); gap: 0; flex: 1; min-height: 0; border-top: 1px solid var(--line) }
 .exp-body.with-preview { grid-template-columns: 380px minmax(0, 1fr) }
 .exp-body .tpls { border-right: 0 }
