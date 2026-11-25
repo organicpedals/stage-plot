@@ -40,10 +40,12 @@
     },
     "files": [
       "dist/**",
+      "build/icon.png",
       "electron/**",
       "package.json"
     ],
     "win": {
+      "icon": "build/icon.ico",
       "target": [
         "nsis",
         "portable"

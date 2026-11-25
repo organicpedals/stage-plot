@@ -67,7 +67,7 @@ h4 { color: var(--muted); letter-spacing: .06em }
 .card:hover { border-color: var(--amber) }
 .card.new { color: var(--muted); background: transparent }
 .card.new b, .ed { color: var(--amber) }
-.logo { background: var(--amber) }
+.logo { background: var(--fg) }
 thead th { background: var(--bg); color: var(--muted) }
 td { border-bottom-color: var(--line) }
 table.edit input.cell { background: transparent }
@@ -141,6 +141,6 @@ button:focus-visible, .card:focus-visible, .btn:focus-within { outline-color: va
 [data-skin='apple'] .sec, [data-skin='apple'] .card { border-radius: 12px; border: .5px solid var(--line); box-shadow: 0 1px 3px #0000001a }
 [data-skin='apple'] .card.new { box-shadow: none; border-style: dashed }
 [data-skin='apple'] .vis-panel, [data-skin='apple'] .mus-list { border-radius: 12px; backdrop-filter: blur(20px) }
-[data-skin='apple'] .logo { border-radius: 8px }
+[data-skin='apple'] .logo { width: 20px; height: 20px }
 [data-skin='apple'] button.danger { color: var(--danger); background: transparent }
 [data-skin='apple'] thead th { text-transform: uppercase; font-size: 10.5px; letter-spacing: .05em }
