@@ -17,7 +17,7 @@ const KINDS: { id: Kind; ext: string; label: [string, string]; tip: [string, str
   { id: 'pdf', ext: '.pdf', label: ['PDF', 'PDF'], tip: ['Documento completo: capa, rider, mapas, input list e energia', 'Full document: cover, rider, plots, input list and power'] },
   { id: 'png', ext: '.png', label: ['Imagem', 'Image'], tip: ['Só o mapa, em imagem PNG', 'Just the plot, as a PNG image'] },
   { id: 'svg', ext: '.svg', label: ['SVG', 'SVG'], tip: ['Só o mapa, em vetor editável (Illustrator, Figma)', 'Just the plot, as editable vector (Illustrator, Figma)'] },
-  { id: 'project', ext: '.stageplot', label: ['Projeto', 'Project'], tip: ['Arquivo .stageplot: backup ou para abrir em outro computador', '.stageplot file: backup, or to open on another computer'] },
+  { id: 'project', ext: '.stgp', label: ['Projeto', 'Project'], tip: ['Arquivo .stgp: backup ou para abrir em outro computador', '.stgp file: backup, or to open on another computer'] },
 ]
 
 export function ExportTab({ p }: { p: Project }) {
@@ -104,7 +104,7 @@ export function ExportTab({ p }: { p: Project }) {
 
             {kind === 'project' && (
               <div className="actions">
-                <button className="primary" title={pt ? 'Salva o projeto inteiro em um arquivo .stageplot' : 'Saves the whole project as a .stageplot file'} onClick={() => run(() => exportProject(p))}>{pt ? 'Salvar projeto (.stageplot)' : 'Save project (.stageplot)'}</button>
+                <button className="primary" title={pt ? 'Salva o projeto inteiro em um arquivo .stgp' : 'Saves the whole project as a .stgp file'} onClick={() => run(() => exportProject(p))}>{pt ? 'Salvar projeto (.stgp)' : 'Save project (.stgp)'}</button>
               </div>
             )}
             {err && <p className="error" role="alert">{err}</p>}

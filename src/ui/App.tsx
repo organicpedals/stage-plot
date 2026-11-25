@@ -45,14 +45,14 @@ function Home() {
       <header className="brand"><span className="logo" />Stage Plot<span className="sp" /><SkinSelect lang="pt" /><ThemeToggle lang="pt" /></header>
       <div className="grid">
         <button title="Cria um projeto novo com o palco vazio" className="card new" onClick={() => addProject(newProject('Nova banda'))}><b>+</b> Novo projeto</button>
-        <label title="Importa projetos salvos (.stageplot) para esta lista" className="card new"><b>↥</b> Importar projetos (.stageplot)<input type="file" accept=".stageplot,.json" multiple hidden onChange={fileIn} /></label>
-        {projects.length > 0 && <button title="Baixa um backup com todos os projetos em um único arquivo .stageplot" className="card new" onClick={() => exportAllProjects(projects)}><b>↧</b> Exportar todos (backup)</button>}
+        <label title="Importa projetos salvos (.stgp) para esta lista" className="card new"><b>↥</b> Importar projetos (.stgp)<input type="file" accept=".stgp,.stageplot,.json" multiple hidden onChange={fileIn} /></label>
+        {projects.length > 0 && <button title="Baixa um backup com todos os projetos em um único arquivo .stgp" className="card new" onClick={() => exportAllProjects(projects)}><b>↧</b> Exportar todos (backup)</button>}
         {projects.map(p => (
           <div key={p.id} className="card" role="button" tabIndex={0} onClick={() => setCurrent(p.id)} onKeyDown={e => { if (e.target === e.currentTarget && (e.key === 'Enter' || e.key === ' ')) { e.preventDefault(); setCurrent(p.id) } }}>
             <h3>{p.band.name || p.name}</h3>
             <p>{p.items.filter(i => i.board === 'stage').length} itens · {p.version}</p>
             <p className="muted">Atualizado em {p.updated}</p>
-            <button title="Baixa só este projeto em um arquivo .stageplot" className="ghost" onClick={e => { e.stopPropagation(); exportProject(p) }}>Exportar</button>
+            <button title="Baixa só este projeto em um arquivo .stgp" className="ghost" onClick={e => { e.stopPropagation(); exportProject(p) }}>Exportar</button>
             <button title="Exclui o projeto (pede confirmação)" className="ghost" onClick={e => { e.stopPropagation(); if (confirm('Excluir este projeto?')) removeProject(p.id) }}>Excluir</button>
           </div>
         ))}

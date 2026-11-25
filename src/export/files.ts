@@ -43,8 +43,8 @@ export async function exportPdf(p: Project, opts?: PdfOptions) {
   download(blob, `${slug(p.band.name || p.name)}-rider-${slug(p.version)}-${styleOf(p).id}${mono ? '-pb' : ''}.pdf`)
 }
 
-/** Arquivo de projeto: extensão própria .stageplot (conteúdo estruturado do app, não um .json solto). */
-export const PROJECT_EXT = '.stageplot'
+/** Arquivo de projeto: extensão própria .stgp (conteúdo estruturado do app, não um .json solto). */
+export const PROJECT_EXT = '.stgp'
 export function exportProject(p: Project) {
   download(new Blob([JSON.stringify(exportPayload([p]), null, 2)], { type: 'application/octet-stream' }), `${slug(p.name)}${PROJECT_EXT}`)
 }

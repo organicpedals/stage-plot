@@ -1,7 +1,7 @@
 import { normalize } from './store'
 import { Project, uid } from './types'
 
-/** Envelope dos arquivos .stageplot (um ou vários projetos). Arquivos antigos (.json, projeto solto) continuam sendo aceitos na importação. */
+/** Envelope dos arquivos .stgp (um ou vários projetos). Arquivos antigos (.json, projeto solto) continuam sendo aceitos na importação. */
 export const FILE_APP = 'stageplot'
 
 export const exportPayload = (projects: Project[]) => ({ app: FILE_APP, format: 1, exported: new Date().toISOString(), projects })
