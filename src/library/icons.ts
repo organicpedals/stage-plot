@@ -2,6 +2,7 @@ import { create } from 'zustand'
 import type { Board, Item, Lang } from '../model/types'
 import { PACKS, packSvg } from './packs'
 import { DYN } from './packs-dyn'
+import { CROP } from './packs-crop'
 
 /* Estilo "contorno suave", minimalista: vista de cima, poucas peças que aludem ao objeto,
    preenchimento translúcido e um ponto de destaque (ciano no áudio, âmbar na luz).
@@ -562,7 +563,14 @@ const withLegacy = (d: IconDef): IconDef => ({
     }
     const st = curStyle()
     if (st === 'D') { const dy = DYN[d.id]; if (dy) { const g = dy(P); return { w: g.w, h: g.h, svg: packSvg(g, g.w, g.h) } } }
-    if (st !== 'S') { const pk = PACKS[st][d.id]; if (pk) return { w, h, svg: packSvg(pk, w, h) } }
+    if (st !== 'S') {
+      const pk = PACKS[st][d.id], c = CROP[d.id]
+      if (pk && c && st === 'D') { // item do tamanho do que está desenhado (rótulo colado no ícone)
+        const k = Math.min(w / pk.w, h / pk.h)
+        return { w: c[2] * k, h: c[3] * k, svg: packSvg({ w: c[2], h: c[3], d: `<g transform="translate(${-c[0]} ${-c[1]})">${pk.d}</g>` }, c[2] * k, c[3] * k) }
+      }
+      if (pk) return { w, h, svg: packSvg(pk, w, h) }
+    }
     return { w, h, svg }
   },
 })
