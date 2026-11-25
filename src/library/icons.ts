@@ -217,7 +217,7 @@ const bassAmp: IconDef = {
 }
 
 const acoustic: IconDef = {
-  id: 'acoustic', cat: 'inst', board: 'stage', label: { pt: 'Violão / guitarra acústica', en: 'Acoustic guitar' },
+  id: 'acoustic', cat: 'inst', board: 'stage', label: { pt: 'Violão', en: 'Acoustic guitar' },
   params: [bool('di', 'Linha (DI)', 'Line (DI)', true), bool('mic', 'Microfone', 'Mic', false)],
   build: () => ART.acoustic,
   channels: (P, base, t) => {
@@ -227,6 +227,12 @@ const acoustic: IconDef = {
     return out
   },
 }
+
+/** Guitarra e baixo: mesmo desenho do violão, só muda nome. Sem microfone, linha ou canais na input list. */
+const eGuitar: IconDef = { id: 'eguitar', cat: 'inst', board: 'stage', label: { pt: 'Guitarra', en: 'Electric guitar' }, params: [], build: () => ART.acoustic }
+const eBass: IconDef = { id: 'ebass', cat: 'inst', board: 'stage', label: { pt: 'Baixo', en: 'Bass guitar' }, params: [], build: () => ART.acoustic }
+/** item -> item cujo desenho ele reaproveita */
+const GLYPH_OF: Record<string, string> = { eguitar: 'acoustic', ebass: 'acoustic' }
 
 const horn: IconDef = {
   id: 'horn', cat: 'inst', board: 'stage', label: { pt: 'Sopros', en: 'Horns' },
@@ -554,7 +560,8 @@ const SGEOM: Record<string, [number, number, number, number, string]> = {
 const withLegacy = (d: IconDef): IconDef => ({
   ...d,
   build: P => {
-    const b = d.build(P), g = SGEOM[d.id] ?? LEG[d.id]
+    const gid = GLYPH_OF[d.id] ?? d.id
+    const b = d.build(P), g = SGEOM[gid] ?? LEG[gid]
     let w = b.w, h = b.h, svg = b.svg
     if (g) {
       const [bx, by, bw, bh, art] = g, s = Math.max(b.w, b.h) / Math.max(bw, bh)
@@ -562,9 +569,9 @@ const withLegacy = (d: IconDef): IconDef => ({
       svg = `<g transform="scale(${s.toFixed(4)}) translate(${-bx} ${-by})" stroke-width="$W(${s.toFixed(4)})">${art}</g>`
     }
     const st = curStyle()
-    if (st === 'D') { const dy = DYN[d.id]; if (dy) { const g = dy(P); return { w: g.w, h: g.h, svg: packSvg(g, g.w, g.h) } } }
+    if (st === 'D') { const dy = DYN[gid]; if (dy) { const g = dy(P); return { w: g.w, h: g.h, svg: packSvg(g, g.w, g.h) } } }
     if (st !== 'S') {
-      const pk = PACKS[st][d.id], c = CROP[d.id]
+      const pk = PACKS[st][gid], c = CROP[gid]
       if (pk && c && st === 'D') { // item do tamanho do que está desenhado (rótulo colado no ícone)
         const k = Math.min(w / pk.w, h / pk.h)
         return { w: c[2] * k, h: c[3] * k, svg: packSvg({ w: c[2], h: c[3], d: `<g transform="translate(${-c[0]} ${-c[1]})">${pk.d}</g>` }, c[2] * k, c[3] * k) }
@@ -576,7 +583,7 @@ const withLegacy = (d: IconDef): IconDef => ({
 })
 
 export const ICONS: IconDef[] = [
-  drums, edrums, perc, pads, keys, organ, piano, accordion, guitarAmp, bassAmp, ampAc, multifx, pedalboard, acoustic, horn, strings, dj, laptop, vocal, backing, choir, talkback, stool, chair, musicStand, stand, fan, rug,
+  drums, edrums, perc, pads, keys, organ, piano, accordion, guitarAmp, bassAmp, ampAc, multifx, pedalboard, acoustic, eGuitar, eBass, horn, strings, dj, laptop, vocal, backing, choir, talkback, stool, chair, musicStand, stand, fan, rug,
   wedge, sidefill, iem, pmix, monDesk, fohDesk, rack, wireless, snake, di,
   paMain, subw, fohTower,
   ac, strip, power, breaker, gen, net,
