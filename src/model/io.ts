@@ -1,7 +1,7 @@
 import { normalize } from './store'
 import { Project, uid } from './types'
 
-/** Envelope dos arquivos .stageplot.json (um ou vários projetos). Arquivos antigos (projeto solto) continuam válidos. */
+/** Envelope dos arquivos .stageplot (um ou vários projetos). Arquivos antigos (.json, projeto solto) continuam sendo aceitos na importação. */
 export const FILE_APP = 'stageplot'
 
 export const exportPayload = (projects: Project[]) => ({ app: FILE_APP, format: 1, exported: new Date().toISOString(), projects })
@@ -14,7 +14,7 @@ const looksLikeProject = (v: unknown): v is Project =>
  *  Aceita: envelope {projects:[…]}, lista de projetos, projeto único ou o formato antigo. Lança Error com mensagem legível. */
 export function parseImport(text: string): Project[] {
   let raw: unknown
-  try { raw = JSON.parse(text) } catch { throw new Error('O arquivo não é um JSON válido.') }
+  try { raw = JSON.parse(text) } catch { throw new Error('O arquivo não é um projeto do Stage Plot válido.') }
   const list: unknown[] = Array.isArray(raw) ? raw : isObj(raw) && Array.isArray(raw.projects) ? raw.projects : [raw]
   const ok = list.filter(looksLikeProject)
   if (!ok.length) throw new Error('Nenhum projeto do Stage Plot foi encontrado no arquivo.')

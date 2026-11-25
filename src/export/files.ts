@@ -43,11 +43,13 @@ export async function exportPdf(p: Project, opts?: PdfOptions) {
   download(blob, `${slug(p.band.name || p.name)}-rider-${slug(p.version)}-${styleOf(p).id}${mono ? '-pb' : ''}.pdf`)
 }
 
-export function exportJson(p: Project) {
-  download(new Blob([JSON.stringify(exportPayload([p]), null, 2)], { type: 'application/json' }), `${slug(p.name)}.stageplot.json`)
+/** Arquivo de projeto: extensão própria .stageplot (conteúdo estruturado do app, não um .json solto). */
+export const PROJECT_EXT = '.stageplot'
+export function exportProject(p: Project) {
+  download(new Blob([JSON.stringify(exportPayload([p]), null, 2)], { type: 'application/octet-stream' }), `${slug(p.name)}${PROJECT_EXT}`)
 }
 
 /** Backup de todos os projetos num único arquivo. */
-export function exportAllJson(ps: Project[]) {
-  download(new Blob([JSON.stringify(exportPayload(ps), null, 2)], { type: 'application/json' }), `stageplot-backup-${new Date().toISOString().slice(0, 10)}.stageplot.json`)
+export function exportAllProjects(ps: Project[]) {
+  download(new Blob([JSON.stringify(exportPayload(ps), null, 2)], { type: 'application/octet-stream' }), `stageplot-backup-${new Date().toISOString().slice(0, 10)}${PROJECT_EXT}`)
 }

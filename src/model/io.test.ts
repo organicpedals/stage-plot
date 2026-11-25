@@ -17,7 +17,7 @@ describe('importar / exportar projetos', () => {
     expect(parseImport(JSON.stringify([mk('X'), mk('Y')]))).toHaveLength(2)
   })
   it('rejeita arquivo inválido com mensagem clara', () => {
-    expect(() => parseImport('não é json')).toThrow(/JSON/)
+    expect(() => parseImport('não é json')).toThrow(/válido/)
     expect(() => parseImport('{"a":1}')).toThrow(/Nenhum projeto/)
   })
   it('migra projeto antigo sem ano e com palco de outro tamanho', () => {
