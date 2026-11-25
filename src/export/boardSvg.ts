@@ -46,13 +46,14 @@ export function itemShape(it: Item, theme: Theme, strokeM = 0.02, auto = 1): str
 
 export function itemLabel(it: Item, p: Project, theme: Theme, fs = 0.17, badge?: string, auto = 1): string {
   const { hh } = itemExtent(it, auto), h = hh * 2
+  fs *= it.scale || 1 // o texto acompanha o ajuste de tamanho do item
   const text = it.kind === 'text' ? (it.label || it.note) : itemName(it, p.lang)
   const ty = it.kind === 'text' ? it.y + fs * 0.35 : it.y + h / 2 + fs * 1.2
   let out = '', y = ty
   if (text) out += `<text x="${it.x}" y="${ty}" font-size="${fs}" font-family="${theme.font}" fill="${theme.fg}" text-anchor="middle">${esc(text)}</text>`
   if (badge && it.kind !== 'text') {
-    const w = 0.2 + badge.length * 0.1, by = (text ? y : it.y + h / 2) + 0.07
-    out += `<rect x="${it.x - w / 2}" y="${by}" width="${w}" height="0.22" rx="0.11" fill="${theme.audio}"/><text x="${it.x}" y="${by + 0.165}" font-size="0.14" font-weight="bold" font-family="${theme.font}" fill="${theme.bg}" text-anchor="middle">${esc(badge)}</text>`
+    const bk = fs / 0.17, w = (0.2 + badge.length * 0.1) * bk, by = (text ? y : it.y + h / 2) + 0.07 * bk
+    out += `<rect x="${it.x - w / 2}" y="${by}" width="${w}" height="${0.22 * bk}" rx="${0.11 * bk}" fill="${theme.audio}"/><text x="${it.x}" y="${by + 0.165 * bk}" font-size="${0.14 * bk}" font-weight="bold" font-family="${theme.font}" fill="${theme.bg}" text-anchor="middle">${esc(badge)}</text>`
   }
   return out
 }
