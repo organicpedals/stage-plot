@@ -2,7 +2,7 @@ import { inputList, outputList, powerList } from '../model/derive'
 import type { Project } from '../model/types'
 import type { Col, Doc } from './pdfDoc'
 import { people, riderSections } from './parts'
-import { boardSvg } from './boardSvg'
+import { boardSvg, MOUNT, mountOf } from './boardSvg'
 import { Block, fmtBlocks, fmtCell, fmtLabel } from './textFormat'
 
 /**
@@ -102,6 +102,18 @@ export function fitInputs(doc: Doc) {
 
 /** Mapa (palco ou luz) encaixado na caixa dada, sem legenda nem escala: só o desenho. */
 export async function drawBoard(doc: Doc, part: 'stage' | 'light', x: number, y: number, w: number, h: number, theme = doc.th) {
-  const r = boardSvg(doc.p, part, { theme, showLegend: false, showScale: false, margin: 0.3 })
-  return doc.svgFit(r.svg, r.w / r.h, x, y, w, h)
+  const r = boardSvg(doc.p, part, { theme, showLegend: false, showScale: false, showMountLegend: false, margin: 0.3 })
+  const used = part === 'light' ? (['aereo', 'chao'] as const).filter(k => doc.p.items.some(i => !i.hidden && i.board === 'light' && mountOf(i) === k)) : []
+  const rows = 5
+  const box = doc.svgFit(r.svg, r.w / r.h, x, y, w, h - (used.length ? used.length * rows + 2 : 0)) // desenho acima da legenda
+  // legenda de posição (aéreo/chão): canto inferior direito da página, longe do mapa
+  const R = x + w
+  used.forEach((k, i) => {
+    const label = doc.lang === 'pt' ? MOUNT[k].pt : MOUNT[k].en, yy = y + h - (used.length - 1 - i) * rows - 1.2
+    doc.d.setFontSize(7)
+    const tw = doc.d.getTextWidth(label)
+    doc.fill(doc.mono ? theme.fg : MOUNT[k].color); doc.d.circle(R - tw - 3.4, yy - 0.9, 1.1, 'F')
+    doc.txt(label, R, yy, { size: 7, align: 'right' })
+  })
+  return box
 }

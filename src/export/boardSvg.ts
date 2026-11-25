@@ -73,7 +73,7 @@ export function mountMarks(items: Item[], theme: Theme, auto = 1): string {
   return out
 }
 
-export interface BoardOpts { theme: Theme; showGrid?: boolean; showLegend?: boolean; /** régua/escala com as dimensões do palco (padrão: sim) */ showScale?: boolean; title?: string; width?: number; margin?: number }
+export interface BoardOpts { theme: Theme; showGrid?: boolean; showLegend?: boolean; /** legenda aéreo/chão dentro do desenho (padrão: sim; o PDF a põe no canto da página) */ showMountLegend?: boolean; /** régua/escala com as dimensões do palco (padrão: sim) */ showScale?: boolean; title?: string; width?: number; margin?: number }
 
 /** SVG completo e autocontido (unidades = metros). */
 export function boardSvg(p: Project, board: Board, o: BoardOpts): { svg: string; w: number; h: number } {
@@ -96,7 +96,7 @@ export function boardSvg(p: Project, board: Board, o: BoardOpts): { svg: string;
   }
   eL = Math.max(0, eL - m * 0.5); eR = Math.max(0, eR - m * 0.5); eT = Math.max(0, eT - m * 0.5); eB = Math.max(0, eB - 0.4 * K)
   // legenda de posição (aéreo/chão): coluna na lateral direita, fora do palco, para não cobrir equipamentos
-  const used = board === 'light' ? (['aereo', 'chao'] as const).filter(k => p.items.some(i => i.board === 'light' && mountOf(i) === k)) : []
+  const used = board === 'light' && o.showMountLegend !== false ? (['aereo', 'chao'] as const).filter(k => p.items.some(i => i.board === 'light' && mountOf(i) === k)) : []
   const mLabel = (k: 'aereo' | 'chao') => (p.lang === 'pt' ? MOUNT[k].pt : MOUNT[k].en)
   const legW = used.length ? (0.45 + Math.max(...used.map(k => mLabel(k).length)) * 0.13) * K : 0
   eR += legW
